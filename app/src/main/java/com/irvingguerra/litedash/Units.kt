@@ -26,8 +26,8 @@ fun Double.toFahrenheit(imperial: Boolean): Double = if (imperial) this * 9.0 / 
 fun Float.toFahrenheit(imperial: Boolean): Float = toDouble().toFahrenheit(imperial).toFloat()
 
 /**
- * Las unidades que se ven: [miles] = mph, millas, mpg y galones (si no, km/h, km, km/l y
- * litros); [fahrenheit] = °F (si no, °C). Sale de [Preferences.units].
+ * Las unidades que se ven: [miles] = mph, millas y galones (si no, km/h, km y litros);
+ * el consumo conserva L/100 km. [fahrenheit] = °F (si no, °C). Sale de [Preferences.units].
  */
 data class UnitChoice(val miles: Boolean, val fahrenheit: Boolean)
 

@@ -16,7 +16,7 @@ class TripLogTest {
         assertEquals(60f, t.avgKmh, 0.5f)
         assertEquals(2600f, t.maxRpm, 0.1f)
         assertEquals(0.333f, t.liters!!, 0.01f)
-        assertEquals(30f, t.kmPerLiter!!, 0.5f)
+        assertEquals(3.33f, t.litresPer100Km!!, 0.01f)
     }
 
     @Test
@@ -46,7 +46,7 @@ class TripLogTest {
         assertEquals(t.start, back.start)
         assertEquals(t.km, back.km, 0.01f)
         assertNull(back.maxCoolant)
-        assertNull(back.kmPerLiter)
+        assertNull(back.litresPer100Km)
     }
 
     @Test

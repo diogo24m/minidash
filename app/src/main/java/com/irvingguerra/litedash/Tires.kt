@@ -2,7 +2,7 @@ package com.irvingguerra.litedash
 
 import android.os.Build
 import com.irvingguerra.litedash.feature.obd.FactoryTires
-import com.irvingguerra.litedash.feature.obd.ObdRepository
+import com.irvingguerra.litedash.feature.obd.SpdRepository
 import com.irvingguerra.litedash.feature.car.WheelSpots
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
@@ -1036,7 +1036,7 @@ internal fun TiresHealthTile(d: Dependencies, onClick: () -> Unit, modifier: Mod
 
 /**
  * La fuente "Auto (OBD)" de Llantas: con el módulo OBD prendido y adaptador guardado, leerlas es querer el
- * escáner ([ObdRepository.want]: conecta solo y, mientras lo quieran, su política no se rinde) y pedirle la
+ * escáner ([SpdRepository.want]: conecta solo y, mientras lo quieran, su política no se rinde) y pedirle la
  * presión de fábrica. Querer en cada lectura (no repite nada si ya lo quiere) también cubre un adaptador que se
  * guarda con la fuente ya andando. Al parar la fuente ([CarTires.stop]), [releaseFactoryTires] lo suelta.
  */

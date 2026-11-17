@@ -5269,7 +5269,6 @@ SPLcom/irvingguerra/litedash/TiresKt;->lengthOf(II)I
 SPLcom/irvingguerra/litedash/TiresKt;->parse(Ljava/lang/String;)Lcom/irvingguerra/litedash/GaugeLook;
 SPLcom/irvingguerra/litedash/TiresKt;->primaryLocale(Landroid/content/res/Configuration;)Ljava/util/Locale;
 SPLcom/irvingguerra/litedash/TiresKt;->rememberGpsPermission(IIILandroidx/compose/runtime/GapComposer;Lcom/irvingguerra/litedash/Dependencies;)Lkotlin/Pair;
-SPLcom/irvingguerra/litedash/TiresKt;->rememberObd(Lcom/irvingguerra/litedash/Dependencies;ZLandroidx/compose/runtime/GapComposer;II)Lcom/irvingguerra/litedash/feature/obd/ObdRepository;
 SPLcom/irvingguerra/litedash/TiresKt;->rememberStarts(Landroidx/compose/runtime/GapComposer;)I
 SPLcom/irvingguerra/litedash/TiresKt;->serverTime(Ljava/lang/String;)Lorg/json/JSONArray;
 SPLcom/irvingguerra/litedash/TiresKt;->text(Ljava/lang/String;)Lorg/json/JSONObject;
@@ -5503,10 +5502,6 @@ Lcom/irvingguerra/litedash/feature/musica/ServicioMusica;
 Lcom/irvingguerra/litedash/feature/navigation/NavigationRepository;
 SPLcom/irvingguerra/litedash/feature/navigation/NavigationRepository;-><init>(Landroid/content/Context;Ljava/util/LinkedHashSet;)V
 Lcom/irvingguerra/litedash/feature/navigation/TurnInstruction;
-Lcom/irvingguerra/litedash/feature/obd/ObdRepository;
-SPLcom/irvingguerra/litedash/feature/obd/ObdRepository;-><clinit>()V
-Lcom/irvingguerra/litedash/feature/obd/ObdState;
-SPLcom/irvingguerra/litedash/feature/obd/ObdState;-><clinit>()V
 Lcom/irvingguerra/litedash/feature/obd/TripStore$all$2;
 SPLcom/irvingguerra/litedash/feature/obd/TripStore$all$2;-><init>(Ljava/lang/Object;Lkotlin/coroutines/Continuation;B)V
 SPLcom/irvingguerra/litedash/feature/obd/TripStore$all$2;->create(Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Lkotlin/coroutines/Continuation;

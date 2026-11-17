@@ -45,12 +45,12 @@ import com.irvingguerra.litedash.core.ui.LocalColors
 import com.irvingguerra.litedash.core.ui.LocalPlainCard
 import com.irvingguerra.litedash.core.ui.Typography
 import com.irvingguerra.litedash.core.vehicle.Signal
+import com.irvingguerra.litedash.core.vehicle.Source
 import com.irvingguerra.litedash.core.vehicle.watch
 import com.irvingguerra.litedash.feature.car.CAR_ASPECT
 import com.irvingguerra.litedash.feature.car.CarPackage
 import com.irvingguerra.litedash.feature.car.CarStill
 import com.irvingguerra.litedash.feature.car.REAR_TURN
-import com.irvingguerra.litedash.feature.obd.ObdState
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -97,7 +97,8 @@ fun RoadView(
     val c = LocalColors.current
     val live = demoKmh == null
     // Con un adaptador ya guardado, se reconecta solo (como el velocímetro).
-    val obdOn = live && rememberObd(d)?.state == ObdState.ON
+    if (live) rememberObd(d)
+    val obdOn = live && d.bus.source(Signal.SPEED) == Source.CAN
     val (gps, ask) = if (live) rememberGpsPermission(d) else true to {}
     // El GPS da la velocidad (si no hay OBD) para que las rayas avancen, y los datos del viaje.
     if (live && gps) KeepTripRunning(d.trip)

@@ -46,7 +46,7 @@ import com.irvingguerra.litedash.core.vehicle.watch
 import com.irvingguerra.litedash.feature.car.CAR_TOP_ASPECT
 import com.irvingguerra.litedash.feature.obd.EngineReport
 import com.irvingguerra.litedash.feature.obd.HealthLevel
-import com.irvingguerra.litedash.feature.obd.ObdState
+import com.irvingguerra.litedash.feature.obd.SpdState
 import com.irvingguerra.litedash.feature.obd.SystemHealth
 import com.irvingguerra.litedash.feature.obd.Zone
 import com.irvingguerra.litedash.feature.obd.engineAlert
@@ -162,7 +162,7 @@ private fun Summary(d: Dependencies, health: List<SystemHealth>, report: EngineR
         if (connected) {
             val obd = d.obd
             val vin = report?.vin?.let { stringResource(R.string.health_vin, it) }
-            val line = listOfNotNull(obd.target?.name, obd.adapter, vin).joinToString(" · ")
+            val line = listOfNotNull("SPD", vin).joinToString(" · ")
             if (line.isNotEmpty()) Label(line, Typography.small, c.textMuted, maxLines = 1)
         }
     }
@@ -287,20 +287,19 @@ fun HealthTile(d: Dependencies, showCar: Boolean = true, onClick: () -> Unit) {
     val c = LocalColors.current
     // Con un adaptador guardado se conecta sola (como los medidores), sin abrir el Taller.
     val obd = rememberObd(d)
-    val connected = obd?.state == ObdState.ON
+    val connected = obd?.state == SpdState.ON
     // Los códigos se leen una vez por conexión: sin eso diría "Todo bien" sin haberlos visto. Si
     // ya hay reporte (lo leyó el Taller) no se vuelven a leer.
-    LaunchedEffect(obd, connected) { if (connected && obd?.lastReport == null) obd?.report() }
     val report = if (connected) obd?.lastReport else null
     val health = rememberHealth(d, report, connected)
     val issues = health.issues()
     val fault = health.any { it.level == HealthLevel.FAULT }
     val known = report != null && health.any { it.level != HealthLevel.UNKNOWN }
     val (status, statusColor) = when {
-        obd?.state == ObdState.CONNECTING -> stringResource(R.string.obd_connecting_short) to c.textMuted
+        obd?.state == SpdState.CONNECTING -> stringResource(R.string.obd_connecting_short) to c.textMuted
         connected && issues > 0 -> pluralStringResource(R.plurals.health_issues, issues, issues) to (if (fault) c.danger else c.warning)
         connected && known -> stringResource(R.string.health_all_good) to c.good
-        connected -> stringResource(R.string.obd_reading) to c.textMuted
+        connected -> stringResource(R.string.spd_connected) to c.textMuted
         else -> stringResource(R.string.health_offline) to c.textMuted
     }
     val systems = if (connected) health.filter { it.level != HealthLevel.UNKNOWN } else emptyList()
@@ -314,7 +313,7 @@ fun HealthTile(d: Dependencies, showCar: Boolean = true, onClick: () -> Unit) {
     val codes = report?.codeCount()
     val line = when {
         !connected -> stringResource(R.string.health_connect_short)
-        codes == null -> stringResource(R.string.obd_reading)
+        codes == null -> stringResource(R.string.spd_obd_unavailable)
         codes == 0 -> stringResource(R.string.obd_no_codes)
         else -> pluralStringResource(R.plurals.health_codes, codes, codes)
     }

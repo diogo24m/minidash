@@ -1,7 +1,5 @@
 package com.irvingguerra.litedash
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -9,172 +7,108 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.provider.Settings
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.irvingguerra.litedash.core.ui.Button
 import com.irvingguerra.litedash.core.ui.Icons
 import com.irvingguerra.litedash.core.ui.Label
 import com.irvingguerra.litedash.core.ui.LocalColors
-import com.irvingguerra.litedash.core.ui.Radius
 import com.irvingguerra.litedash.core.ui.SwitchRow
-import com.irvingguerra.litedash.core.ui.TextInput
 import com.irvingguerra.litedash.core.ui.Typography
-import com.irvingguerra.litedash.core.vehicle.LOCAL_NETWORK_PERMISSION
 import com.irvingguerra.litedash.core.vehicle.Signal
-import com.irvingguerra.litedash.core.vehicle.bleScanPermission
-import com.irvingguerra.litedash.core.vehicle.canScanBle
-import com.irvingguerra.litedash.core.vehicle.localNetworkAllowed
 import com.irvingguerra.litedash.core.vehicle.watch
 import com.irvingguerra.litedash.feature.obd.EngineAlert
-import com.irvingguerra.litedash.feature.obd.EngineReport
-import com.irvingguerra.litedash.feature.obd.MonitorName
-import com.irvingguerra.litedash.feature.obd.ObdError
-import com.irvingguerra.litedash.feature.obd.ObdRepository
-import com.irvingguerra.litedash.feature.obd.ObdState
-import com.irvingguerra.litedash.feature.obd.ObdTarget
-import com.irvingguerra.litedash.feature.obd.ScanProblem
-import com.irvingguerra.litedash.feature.obd.describe
+import com.irvingguerra.litedash.feature.obd.SpdSignals
+import com.irvingguerra.litedash.feature.obd.SpdRepository
+import com.irvingguerra.litedash.feature.obd.SpdState
 import com.irvingguerra.litedash.feature.obd.engineAlert
-import com.irvingguerra.litedash.feature.obd.zoneOf
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-/** El verde de "todo bien"; lo comparte la pantalla Salud. */
-
-/** Las pestañas del Taller (para recordar la elegida) y cuál es la de códigos. */
-private const val WORKSHOP_TABS = "workshop"
-private const val CODES_TAB = 1
-
-/**
- * El Taller (sección de Ajustes, "Salud del auto"): arriba el estado del auto por sistema; luego
- * códigos de falla (leer y borrar) con la verificación, sensores en vivo, gráficas y lo demás
- * (conexión, alertas, 0–100 y viajes). Mientras se ve, quiere el escáner y el OBD solo lee lo que hay aquí.
- */
+/** Datos y diagnósticos del servicio SPD de la central. */
 @Composable
 internal fun Workshop(d: Dependencies, onTires: () -> Unit) {
-    val obd = d.obd
-    val alerts = @Composable {
-        SettingsCard {
-            SwitchRow(stringResource(R.string.engine_alerts), d.prefs.engineAlerts, { d.prefs.engineAlerts = it }, stringResource(R.string.engine_alerts_help))
-        }
+    val spd = d.obd
+    LifecycleStartEffect(spd, d.obdModule) {
+        if (d.obdModule) spd.want(WORKSHOP)
+        spd.wake()
+        onStopOrDispose { spd.release(WORKSHOP) }
     }
-    // El permiso de Bluetooth; al volver se revisa otra vez (pudo darse en Ajustes de Android).
-    var permitted by remember { mutableStateOf(obd.hasPermission()) }
-    LifecycleResumeEffect(Unit) {
-        permitted = obd.hasPermission()
-        onPauseOrDispose { }
-    }
-    // Mientras se ve el Taller lo quiere: conecta solo al último adaptador que funcionó (también si se había
-    // rendido) y al salir, si nadie más lo quiere, se desconecta. Sin permiso de Bluetooth no (fallaría en rojo):
-    // se conecta al darlo.
-    val needsBluetooth = obd.target is ObdTarget.Bluetooth || obd.target is ObdTarget.Ble
-    val wants = permitted || !needsBluetooth
-    DisposableEffect(wants) {
-        if (wants) obd.want(WORKSHOP)
-        onDispose { if (wants) obd.release(WORKSHOP) }
-    }
-    val connected = obd.state == ObdState.ON
-    // El reporte se lee una vez aquí y lo comparten Salud y Códigos; el último de esta conexión se muestra de
-    // inmediato para que al volver a entrar no parpadee. [failed]: la última lectura no contestó.
-    val scope = rememberCoroutineScope()
-    var report by remember { mutableStateOf(obd.lastReport) }
-    var reading by remember { mutableStateOf(true) }
-    var failed by remember { mutableStateOf(false) }
-    val job = remember { mutableStateOf<Job?>(null) }
-    // Tocar "Leer otra vez" mientras ya se lee no lanza otra lectura.
-    fun read() {
-        if (job.value?.isActive == true) return
-        reading = true
-        job.value = scope.launch {
-            val r = obd.report()
-            // Si falla, se queda lo último de esta conexión y se dice que no se pudo leer.
-            if (r != null) report = r
-            failed = r == null
-            reading = false
-        }
-    }
-    // Cada conexión empieza de cero (otro adaptador u otro auto): lo leído en la anterior ya no vale.
-    LaunchedEffect(connected) {
-        job.value?.cancel()
-        report = obd.lastReport
-        failed = false
-        if (connected) read() else reading = false
-    }
-
-    // Sin adaptador: la misma pantalla en gris (sin lo leído antes) y cómo conectarlo.
-    if (!connected) {
-        HealthView(d, report = null, connected = false, onTires = onTires)
-        Connection(d, permitted) { permitted = it }
-        alerts()
-        // Los viajes guardados se ven aunque no haya adaptador conectado.
-        return TripsCard(d)
-    }
-    val tab = tabs(
-        listOf(R.string.tab_health, R.string.obd_codes, R.string.tab_sensors, R.string.tab_charts, R.string.tab_more),
-        WORKSHOP_TABS,
-    )
-    when (tab) {
-        0 -> HealthView(d, report, connected = true, reading, ::read, onCodes = { selectTab(WORKSHOP_TABS, CODES_TAB) }, onTires = onTires)
-        CODES_TAB -> {
-            // Borrados: lo leído antes ya no vale (si la lectura nueva falla, se dice que no se pudo, no "Sin códigos").
-            CodesCard(obd, report, reading, failed, ::read) { ok ->
-                if (ok) report = null
-                read()
+    Connection(d)
+    if (spd.state == SpdState.ON) {
+        when (tabs(listOf(R.string.tab_sensors, R.string.tab_charts, R.string.spd_diagnostics, R.string.tab_more), "spd_workshop")) {
+            0 -> {
+                LiveSensors(d)
+                SettingsCard(stringResource(R.string.spd_vehicle)) {
+                    spd.doors?.let { doors ->
+                        val names = listOf(R.string.spd_front_left, R.string.spd_front_right, R.string.spd_rear_left, R.string.spd_rear_right, R.string.spd_trunk, R.string.spd_hood)
+                        for ((i, open) in doors.withIndex())
+                            Label(stringResource(R.string.spd_field, stringResource(names[i]), stringResource(if (open) R.string.spd_open else R.string.spd_closed)), Typography.body)
+                    }
+                    Button(stringResource(R.string.tires), onTires)
+                }
+                if (spd.services.isNotEmpty()) SettingsCard(stringResource(R.string.spd_maintenance)) {
+                    for (service in spd.services) {
+                        val title = stringResource(when (service.code) { 1 -> R.string.spd_service_oil; 2 -> R.string.spd_service_inspection; 3 -> R.string.spd_service_brakes; else -> R.string.spd_maintenance })
+                        val date = if (service.month != null && service.year != null) String.format(currentLocale(), "%02d/%04d", service.month, service.year) else "—"
+                        val left = service.remainingKm?.let { sensorText(SpdSignals.RANGE, it.toFloat(), d.prefs.units, currentLocale()) } ?: "—"
+                        Label(title, Typography.subtitle)
+                        Label(stringResource(R.string.spd_service_details, date, left, stringResource(if (service.ok) R.string.spd_service_ok else R.string.spd_service_unknown)), Typography.body)
+                    }
+                }
             }
-            InspectionCard(report, reading)
+            1 -> LiveCharts(d)
+            2 -> SettingsCard(stringResource(R.string.spd_diagnostics), stringResource(R.string.spd_diagnostics_help)) {
+                var now by remember { mutableStateOf(android.os.SystemClock.elapsedRealtime()) }
+                LaunchedEffect(Unit) { while (true) { delay(1_000); now = android.os.SystemClock.elapsedRealtime() } }
+                if (spd.diagnosticsAt == 0L) Label(stringResource(R.string.obd_reading), Typography.body)
+                else if (now - spd.diagnosticsAt > 30_000) Label(stringResource(R.string.spd_stale), Typography.body, LocalColors.current.warning)
+                for ((key, value) in spd.diagnostics) {
+                    val name = stringResource(when (key) {
+                        "spd_check" -> R.string.spd_check
+                        "spd_acc" -> R.string.spd_acc
+                        "spd_brake" -> R.string.spd_brake
+                        "spd_handbrake" -> R.string.spd_handbrake
+                        "spd_parking" -> R.string.spd_parking
+                        "spd_gear" -> R.string.spd_gear
+                        "spd_rpm_100004" -> R.string.spd_rpm_100004
+                        "spd_rpm_100042" -> R.string.spd_rpm_100042
+                        "spd_rpm_120340" -> R.string.spd_rpm_120340
+                        "spd_speed" -> R.string.sensor_speed
+                        "spd_lights" -> R.string.spd_lights
+                        "spd_brightness" -> R.string.spd_brightness
+                        else -> R.string.spd_oil
+                    })
+                    Label(name, Typography.subtitle)
+                    Label(value ?: "—", Typography.body)
+                }
+            }
+            else -> { AccelTimerCard(d); TripsCard(d) }
         }
-        2 -> LiveSensors(d)
-        3 -> LiveCharts(d)
-        else -> {
-            Connection(d, permitted) { permitted = it }
-            alerts()
-            AccelTimerCard(d)
-            TripsCard(d)
-        }
-    }
+    } else TripsCard(d)
 }
 
-/** La llave con que el Taller quiere el escáner ([ObdRepository.want]). */
+/** La llave con que el Taller quiere el escáner ([SpdRepository.want]). */
 private val WORKSHOP = Any()
 
 /** Una alerta ya resuelta se olvida tras esto (un dato perdido no la "resuelve"). */
@@ -196,7 +130,7 @@ class EngineAlertState {
  */
 @Composable
 fun EngineAlertBanner(d: Dependencies, state: EngineAlertState) {
-    if (rememberObd(d, d.prefs.engineAlerts)?.state != ObdState.ON) return
+    if (rememberObd(d, d.prefs.engineAlerts)?.state != SpdState.ON) return
     val coolant = d.bus.watch(Signal.COOLANT)
     val voltage = d.bus.watch(Signal.VOLTAGE)
     val alert = engineAlert(coolant, voltage, d.bus.watch(Signal.RPM))
@@ -229,160 +163,26 @@ fun EngineAlertBanner(d: Dependencies, state: EngineAlertState) {
     }
 }
 
-/** La dirección de fábrica de los adaptadores por Wi‑Fi (casi todos los ELM327 la traen). */
-/**
- * El permiso de Bluetooth que pide «Permitir». BLUETOOTH_CONNECT solo existe desde Android 12; antes basta el de
- * siempre (se da al instalar), así que ahí el botón ni sale ([ObdRepository.hasPermission] ya es verdadero).
- */
-private val BLUETOOTH_PERMISSION =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) Manifest.permission.BLUETOOTH_CONNECT else Manifest.permission.BLUETOOTH
-
-private const val OBD_WIFI_ADDRESS = "192.168.0.10:${ObdTarget.Wifi.DEFAULT_PORT}"
-
-/**
- * El adaptador: cómo va la conexión (o por qué falló) y elegir uno. [permitted] es el permiso de Bluetooth (lo
- * guarda el Taller: con él quiere el escáner); [onPermitted] lo cambia al responder.
- */
-@OptIn(ExperimentalLayoutApi::class)
+/** Estado de la conexión integrada; SPD no necesita emparejamiento ni permisos Bluetooth. */
 @Composable
-private fun Connection(d: Dependencies, permitted: Boolean, onPermitted: (Boolean) -> Unit) {
-    val c = LocalColors.current
-    val obd = d.obd
-    val bluetoothAsk = rememberPermissionAsk(BLUETOOTH_PERMISSION, onPermitted)
-    // Buscar Bluetooth LE tiene su propio permiso; al darlo, busca de una vez.
-    val askScan = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { if (it) obd.scanBle() }
-    var wifi by remember { mutableStateOf(false) }
-    var address by remember { mutableStateOf(OBD_WIFI_ADDRESS) }
-    // Muchas pantallas esconden dónde prender el Bluetooth: aquí se prende y se apaga.
-    val context = LocalContext.current
-    // OBD por Wi‑Fi en Android 17+: la red local pide permiso; al darlo, conecta al que se estaba tratando.
-    var wifiTarget by remember { mutableStateOf<ObdTarget.Wifi?>(null) }
-    val lanAsk = rememberPermissionAsk(LOCAL_NETWORK_PERMISSION) { ok -> if (ok) obd.connect(wifiTarget ?: obd.target) }
-    // Al volver de Ajustes de Android con el permiso de la red local ya dado, conecta sin tocar nada más.
-    LifecycleResumeEffect(Unit) {
-        if ((obd.needsLocalNetwork || lanAsk.denied) && localNetworkAllowed(context)) {
-            lanAsk.denied = false
-            obd.connect(wifiTarget ?: obd.target)
-        }
-        onPauseOrDispose { }
-    }
-    val bluetooth = rememberBluetoothOn()
-    val askEnable = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
-    LaunchedEffect(obd.state) { if (obd.state == ObdState.CONNECTING || obd.state == ObdState.ON) d.prefs.obdModule = true }
-    SettingsCard(stringResource(R.string.obd_adapter), stringResource(R.string.obd_adapter_help)) {
-        val name = obd.target?.name ?: ""
-        val status = when (obd.state) {
-            ObdState.OFF -> stringResource(R.string.obd_off)
-            ObdState.CONNECTING -> stringResource(R.string.obd_connecting, name)
-            ObdState.ON -> obd.adapter?.let { stringResource(R.string.obd_on_adapter, name, it) } ?: stringResource(R.string.obd_on, name)
-            ObdState.ERROR -> stringResource(obdErrorText(obd.errorKind))
-        }
-        Label(status, Typography.body, if (obd.state == ObdState.ERROR) c.danger else if (obd.state == ObdState.ON) c.good else c.textMuted)
-        when {
-            obd.state == ObdState.ON || obd.state == ObdState.CONNECTING -> Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(stringResource(R.string.obd_disconnect), { obd.disconnect() })
-                Button(stringResource(R.string.obd_other), { obd.forget() })
-            }
-            obd.needsLocalNetwork || wifi && lanAsk.denied -> {
-                Label(stringResource(R.string.obd_local_network), Typography.body, c.textMuted)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PermissionButtons(lanAsk, stringResource(R.string.local_network_allow))
-                    Button(stringResource(R.string.obd_other), {
-                        lanAsk.denied = false
-                        wifi = false
-                        obd.forget()
-                    })
-                }
-            }
-            // Si no cabe todo en un renglón (celular), los botones bajan y el campo conserva su ancho.
-            wifi -> FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                itemVerticalAlignment = Alignment.CenterVertically,
-            ) {
-                TextInput(address, { address = it.trim() }, OBD_WIFI_ADDRESS, Modifier.widthIn(min = 220.dp, max = 260.dp))
-                Button(stringResource(R.string.obd_connect), {
-                    val host = address.substringBefore(':')
-                    val port = address.substringAfter(':', "").toIntOrNull() ?: ObdTarget.Wifi.DEFAULT_PORT
-                    if (host.isNotBlank()) {
-                        val t = ObdTarget.Wifi(host, port)
-                        wifiTarget = t
-                        if (localNetworkAllowed(context)) obd.connect(t) else lanAsk.ask()
-                    }
-                }, primary = true)
-                Button(stringResource(R.string.obd_bluetooth), { wifi = false })
-            }
-            // Antes de Android 12 el permiso viene con la app: aquí no se llega.
-            !permitted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                PermissionButtons(bluetoothAsk, stringResource(R.string.obd_allow_bluetooth))
-                Button(stringResource(R.string.obd_wifi), { wifi = true })
-            }
-            bluetooth == false -> {
-                Label(stringResource(R.string.bluetooth_off), Typography.body, c.danger)
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Button(stringResource(R.string.bluetooth_turn_on), { requestBluetoothOn(context, askEnable) }, primary = true)
-                    Button(stringResource(R.string.obd_wifi), { wifi = true })
-                }
-            }
-            else -> {
-                val devices = remember(permitted, obd.state, bluetooth) { obd.pairedDevices() }
-                if (devices.isEmpty()) Label(stringResource(R.string.obd_no_paired), Typography.small, c.textMuted)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    for (dev in devices) Button(dev.name, { obd.connect(dev) }, primary = dev == obd.target)
-                    Button(stringResource(R.string.obd_wifi), { wifi = true })
-                    Button(stringResource(if (obd.scanning) R.string.obd_ble_searching else R.string.obd_ble_search), {
-                        if (canScanBle(context)) obd.scanBle() else askScan.launch(bleScanPermission())
-                    })
-                    if (bluetooth == true) Button(stringResource(R.string.bluetooth_turn_off), { turnOffBluetooth(context) })
-                }
-                // Cables USB conectados: el permiso lo pide Android al tocar uno.
-                val usb = remember(obd.state) { obd.usbDevices() }
-                if (usb.isNotEmpty()) {
-                    Label(stringResource(R.string.obd_usb_found), Typography.label, c.textMuted)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        for (dev in usb) Button(dev.name, { obd.connect(dev) }, primary = dev == obd.target)
-                    }
-                }
-                // Los adaptadores Bluetooth LE no se emparejan: aparecen al buscar.
-                if (obd.found.isNotEmpty()) {
-                    Label(stringResource(R.string.obd_ble_found), Typography.label, c.textMuted)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        for (dev in obd.found) Button(dev.name, { obd.connect(dev) }, primary = dev == obd.target)
-                    }
-                }
-                val problem = obd.scanProblem
-                if (problem != null) {
-                    val text = when (problem) {
-                        ScanProblem.BLUETOOTH_OFF -> R.string.obd_ble_bluetooth_off
-                        ScanProblem.LOCATION_OFF -> R.string.obd_ble_location_off
-                        ScanProblem.FAILED -> R.string.obd_ble_failed
-                    }
-                    Label(stringResource(text), Typography.small, c.danger)
-                } else if (obd.found.isEmpty() && !obd.scanning && obd.searched) {
-                    Label(stringResource(R.string.obd_ble_none), Typography.small, c.textMuted)
-                }
-            }
-        }
+private fun Connection(d: Dependencies) {
+    val spd = d.obd
+    SettingsCard(stringResource(R.string.spd_connection), stringResource(R.string.spd_connection_help)) {
+        SwitchRow(stringResource(R.string.module_obd), d.obdModule, { d.obdModule = it })
+        val status = spdConnectionText(spd.available, spd.state)
+        Label(stringResource(status), Typography.body)
+        if (spd.available && d.obdModule && spd.state != SpdState.ON && spd.state != SpdState.CONNECTING)
+            Button(stringResource(R.string.obd_connect), { spd.connect() }, primary = true)
     }
 }
 
-/** Por qué no hay conexión con el adaptador, en el idioma de la app (el detalle crudo solo va al reporte). */
-internal fun obdErrorText(kind: ObdError?) = when (kind) {
-    ObdError.BLUETOOTH_OFF -> R.string.obd_error_bluetooth_off
-    ObdError.NO_BLUETOOTH_PERMISSION -> R.string.obd_error_no_bluetooth_permission
-    ObdError.NO_USB -> R.string.obd_error_no_usb
-    ObdError.NO_USB_PERMISSION -> R.string.obd_error_no_usb_permission
-    ObdError.USB_UNPLUGGED -> R.string.obd_error_usb_unplugged
-    ObdError.USB_NOT_SERIAL -> R.string.obd_error_usb_not_serial
-    ObdError.USB_SILENT -> R.string.obd_error_usb_silent
-    ObdError.NOT_OBD -> R.string.obd_error_not_obd
-    ObdError.GATT_BUSY -> R.string.obd_error_gatt_busy
-    ObdError.ADAPTER_UNREACHABLE -> R.string.obd_error_adapter_unreachable
-    ObdError.ADAPTER_SILENT -> R.string.obd_error_adapter_silent
-    ObdError.CAR_SILENT -> R.string.obd_error_car_silent
-    ObdError.CONNECTION_LOST -> R.string.obd_error_connection_lost
-    ObdError.UNKNOWN, null -> R.string.obd_error_unknown
-}
+internal fun spdConnectionText(available: Boolean, state: SpdState): Int =
+    if (!available) R.string.spd_unavailable else when (state) {
+        SpdState.ON -> R.string.spd_connected
+        SpdState.CONNECTING -> R.string.obd_connecting_short
+        SpdState.ERROR -> R.string.spd_failed
+        SpdState.OFF -> R.string.obd_off
+    }
 
 /**
  * Un permiso que se pide al tocar. [denied]: ya se negó; Android puede no volver a preguntar, así que junto a
@@ -440,122 +240,6 @@ internal fun rememberBluetoothOn(): Boolean? {
     return on
 }
 
-/**
- * Apagar el Bluetooth: hasta Android 12 la app puede hacerlo directo; desde Android 13 solo
- * el sistema, así que se abren sus ajustes de Bluetooth.
- */
-@SuppressLint("MissingPermission")
-private fun turnOffBluetooth(context: Context) {
-    val adapter = context.getSystemService(BluetoothManager::class.java)?.adapter
-    @Suppress("DEPRECATION")
-    val done = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && adapter != null && runCatching { adapter.disable() }.getOrDefault(false)
-    if (!done) openSystemScreen(context, Intent(Settings.ACTION_BLUETOOTH_SETTINGS))
-}
-
-/** Cómo está guardado un código: encendió la luz, el auto lo vigila o ya no se borra a mano. */
-private enum class CodeKind(val label: Int) {
-    STORED(R.string.code_stored),
-    PENDING(R.string.code_pending),
-    PERMANENT(R.string.code_permanent),
-}
-
-/**
- * Los códigos de falla, una tarjeta por código (qué significa y qué parte del auto señala), y borrarlos
- * (se confirma). [failed]: la última lectura no contestó (sin reporte no se dice "Sin códigos"). [onCleared]
- * recibe si el auto aceptó el borrado (quien llama vuelve a leer).
- */
-@Composable
-private fun CodesCard(obd: ObdRepository, report: EngineReport?, reading: Boolean, failed: Boolean, onRead: () -> Unit, onCleared: (Boolean) -> Unit) {
-    val c = LocalColors.current
-    val scope = rememberCoroutineScope()
-    var cleared by remember { mutableStateOf<Boolean?>(null) }
-    val r = report
-    SettingsCard(stringResource(R.string.obd_codes), stringResource(R.string.obd_codes_help)) {
-        if (reading && r == null) return@SettingsCard Label(stringResource(R.string.obd_reading), Typography.body, c.textMuted)
-        if (r != null) {
-            // Un código guardado suele ser también permanente: una sola tarjeta con los dos.
-            val codes = (r.stored.map { code -> code to CodeKind.STORED } +
-                r.permanent.map { code -> code to CodeKind.PERMANENT } +
-                r.pending.map { code -> code to CodeKind.PENDING })
-                .groupBy({ it.first }, { it.second }).toList()
-            if (codes.isEmpty()) {
-                StatTile(stringResource(R.string.obd_codes), stringResource(R.string.obd_no_codes), Modifier.fillMaxWidth(), valueColor = c.good, dot = c.good)
-            } else {
-                TileGrid(codes, minWidth = 280.dp, maxColumns = 2) { (code, kinds), modifier -> CodeTile(code, kinds, modifier) }
-            }
-        }
-        if (failed && !reading) Label(stringResource(R.string.obd_read_failed), Typography.body, c.danger)
-        cleared?.let { Label(stringResource(if (it) R.string.obd_cleared else R.string.obd_not_cleared), Typography.small, if (it) c.good else c.danger) }
-        if (r != null && (r.stored.isNotEmpty() || r.pending.isNotEmpty() || r.readiness?.mil == true)) {
-            // Se confirma con la advertencia a la vista: borrar también reinicia los monitores de la verificación.
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Confirmed(
-                    stringResource(R.string.obd_clear),
-                    stringResource(R.string.obd_clear_question),
-                    stringResource(R.string.obd_clear_confirm),
-                    stringResource(R.string.obd_clear_warning),
-                ) {
-                    scope.launch {
-                        val ok = obd.clearCodes()
-                        cleared = ok
-                        onCleared(ok)
-                    }
-                }
-                Button(stringResource(R.string.obd_read_again), onRead)
-            }
-        } else {
-            Button(stringResource(R.string.obd_read_again), onRead)
-        }
-    }
-}
-
-/** Un código: grande en su color (rojo si encendió la luz, ámbar si está pendiente), qué es y dónde. */
-@Composable
-private fun CodeTile(code: String, kinds: List<CodeKind>, modifier: Modifier) {
-    val c = LocalColors.current
-    val color = if (kinds.all { it == CodeKind.PENDING }) c.warning else c.danger
-    Column(
-        modifier.clip(RoundedCornerShape(Radius.inner)).background(c.surfaceHigh).padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Label(code, Typography.title, color, maxLines = 1, modifier = Modifier.weight(1f))
-            Label(kinds.map { stringResource(it.label) }.joinToString(" · "), Typography.small, color, maxLines = 1)
-        }
-        Label(describe(code, LocalResources.current), Typography.body, maxLines = 2)
-        Label(stringResource(zoneName(zoneOf(code))), Typography.small, c.textMuted, maxLines = 1)
-    }
-}
-
-/** Si pasaría la verificación: luz de falla y el estado de cada monitor. */
-@Composable
-private fun InspectionCard(report: EngineReport?, reading: Boolean) {
-    val c = LocalColors.current
-    val readiness = report?.readiness
-    if (readiness == null) {
-        if (!reading) SettingsCard { Label(stringResource(R.string.obd_no_readiness), Typography.body, c.textMuted) }
-        return
-    }
-    SettingsCard(stringResource(R.string.obd_inspection), stringResource(R.string.obd_inspection_help)) {
-        // Con luz de falla no pasa; con más de un monitor pendiente tampoco (la regla común).
-        val pass = !readiness.mil && readiness.incomplete.size <= 1
-        Label(
-            stringResource(if (pass) R.string.obd_inspection_pass else R.string.obd_inspection_fail),
-            Typography.subtitle,
-            if (pass) c.good else c.danger,
-        )
-        TileGrid(readiness.monitors, minWidth = 240.dp, maxColumns = 2, gap = 6.dp) { m, modifier ->
-            // Aire a la derecha: "Listo" no se pega al punto de la otra columna.
-            Row(modifier.padding(end = 18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.size(8.dp).clip(CircleShape).background(if (m.complete) c.good else c.warning))
-                Label(stringResource(monitorName(m.name)), Typography.body, maxLines = 1, modifier = Modifier.weight(1f))
-                Label(stringResource(if (m.complete) R.string.obd_ready else R.string.obd_not_ready), Typography.small, c.textMuted, maxLines = 1)
-            }
-        }
-    }
-}
-
-/** Los sensores que más dicen del auto van primero; los demás, en el orden de siempre. */
 private val SENSOR_ORDER = listOf(Signal.RPM, Signal.COOLANT, Signal.VOLTAGE, Signal.CONSUMPTION, Signal.SPEED, Signal.LOAD, Signal.OIL, Signal.BOOST)
 
 /** Los sensores que da este auto, en vivo, en tarjetas con su línea de 90 s (solo se leen mientras se ven). */
@@ -586,6 +270,10 @@ private fun SensorTile(d: Dependencies, signal: String, units: UnitChoice, local
 }
 
 internal fun sensorName(signal: String) = when (signal) {
+    SpdSignals.FUEL_LITRES -> R.string.spd_fuel_litres
+    SpdSignals.RANGE -> R.string.spd_range
+    SpdSignals.ODOMETER -> R.string.spd_odometer
+    SpdSignals.AVERAGE_SPEED -> R.string.spd_average_speed
     Signal.SPEED -> R.string.sensor_speed
     Signal.RPM -> R.string.sensor_rpm
     Signal.LOAD -> R.string.sensor_load
@@ -619,7 +307,9 @@ fun sensorText(signal: String, v: Float, units: UnitChoice, locale: java.util.Lo
     @Composable fun with(number: String, unit: Int) = stringResource(R.string.value_with_unit, number, stringResource(unit))
     gaugeOf(signal)?.let { spec -> return with(gaugeText(spec, v, units, locale), spec.unit(units)) }
     return when (signal) {
-        Signal.SPEED -> if (units.miles) with(String.format(locale, "%.0f", v.toMiles(true)), R.string.unit_mph) else with(String.format(locale, "%.0f", v), R.string.unit_kmh)
+        SpdSignals.FUEL_LITRES -> with(String.format(locale, "%.0f", v), R.string.unit_litres)
+        SpdSignals.RANGE, SpdSignals.ODOMETER -> if (units.miles) with(String.format(locale, "%.0f", v.toMiles(true)), R.string.unit_mi) else with(String.format(locale, "%.0f", v), R.string.unit_km)
+        Signal.SPEED, SpdSignals.AVERAGE_SPEED -> if (units.miles) with(String.format(locale, "%.0f", v.toMiles(true)), R.string.unit_mph) else with(String.format(locale, "%.0f", v), R.string.unit_kmh)
         Signal.LOAD -> with(String.format(locale, "%.0f", v), R.string.unit_percent)
         Signal.MAP, Signal.BARO, Signal.FUEL_PRESSURE -> with(String.format(locale, "%.0f", v), R.string.unit_kpa)
         Signal.MAF -> with(String.format(locale, "%.1f", v), R.string.unit_gs)
@@ -631,17 +321,4 @@ fun sensorText(signal: String, v: Float, units: UnitChoice, locale: java.util.Lo
         // Admisión y ambiente.
         else -> tempText(v, units.fahrenheit)
     }
-}
-
-private fun monitorName(m: MonitorName) = when (m) {
-    MonitorName.MISFIRE -> R.string.monitor_misfire
-    MonitorName.FUEL -> R.string.monitor_fuel
-    MonitorName.COMPONENTS -> R.string.monitor_components
-    MonitorName.CATALYST -> R.string.monitor_catalyst
-    MonitorName.HEATED_CATALYST -> R.string.monitor_heated_catalyst
-    MonitorName.EVAP -> R.string.monitor_evap
-    MonitorName.SECONDARY_AIR -> R.string.monitor_secondary_air
-    MonitorName.O2_SENSOR -> R.string.monitor_o2
-    MonitorName.O2_HEATER -> R.string.monitor_o2_heater
-    MonitorName.EGR -> R.string.monitor_egr
 }

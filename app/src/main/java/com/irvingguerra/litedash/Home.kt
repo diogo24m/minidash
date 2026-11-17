@@ -98,7 +98,7 @@ import com.irvingguerra.litedash.feature.music.ParkedSong
 import com.irvingguerra.litedash.feature.music.RadioTile
 import com.irvingguerra.litedash.feature.music.SoundPiece
 import com.irvingguerra.litedash.feature.navigation.NavigationRepository
-import com.irvingguerra.litedash.feature.obd.ObdRepository
+import com.irvingguerra.litedash.feature.obd.SpdRepository
 import com.irvingguerra.litedash.feature.tpms.TpmsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -165,9 +165,9 @@ class Dependencies(
     val stats: Stats,
     /** LiteDash Pro (en prueba): [ProAccess.isPro] lo leen las funciones Pro. */
     val pro: ProAccess,
-    /** Señales del auto (OBD, GPS…): el tablero solo lee de aquí. */
+    /** Señales del auto (SPD, GPS…): el tablero solo lee de aquí. */
     val bus: VehicleBus,
-    private val obdLazy: Lazy<ObdRepository>,
+    private val obdLazy: Lazy<SpdRepository>,
     private val obdSaved: () -> Boolean,
     private val tpmsLazy: Lazy<TpmsRepository>,
     private val tpmsSaved: () -> Boolean,
@@ -176,15 +176,15 @@ class Dependencies(
     /** Estado de Compose: las piezas que preguntaron antes de que existiera se vuelven a dibujar. */
     private val obdCreated = mutableStateOf(false)
 
-    /** El escáner OBD: se crea la primera vez que algo lo pide (el Taller o una pieza). */
-    val obd: ObdRepository
+    /** Servicio SPD: se crea la primera vez que algo lo pide (el Taller o una pieza). */
+    val obd: SpdRepository
         get() = obdLazy.value.also { if (!obdCreated.value) obdCreated.value = true }
 
-    /** Ya se usó un adaptador OBD alguna vez (sin crear el escáner para saberlo). */
+    /** La central tiene SPD (sin crear el lector). El nombre conserva la API de los widgets. */
     val hasObdAdapter get() = obdSaved()
 
     /**
-     * El módulo OBD prendido (de fábrica, si ya hay adaptador). Apagado nada se conecta solo;
+     * El módulo SPD prendido (de fábrica, si existe el servicio). Apagado nada se conecta solo;
      * apagarlo desconecta.
      */
     var obdModule: Boolean
@@ -194,11 +194,11 @@ class Dependencies(
             if (!on) obdIfCreated()?.disconnect()
         }
 
-    /** Hay adaptador y el módulo está prendido: las piezas pueden conectarse solas. */
+    /** Hay servicio SPD y el módulo está prendido: las piezas pueden conectarse solas. */
     val obdAuto get() = hasObdAdapter && obdModule
 
-    /** El escáner si ya existe, sin crearlo (una pieza solo quiere saber si está conectado). */
-    fun obdIfCreated(): ObdRepository? = if (obdCreated.value) obdLazy.value else null
+    /** El lector SPD si ya existe, sin crearlo. */
+    fun obdIfCreated(): SpdRepository? = if (obdCreated.value) obdLazy.value else null
 
     /**
      * El enlace con LiteDash Connect (Ajustes → Celular). Se arma al volver a LiteDash solo si hay un celular

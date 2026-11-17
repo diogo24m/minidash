@@ -21,7 +21,7 @@ data class TripSummary(
     /** Gasolina que se fue (del gasto 5E o del MAF); null si el auto no da ninguno. */
     val liters: Float?,
 ) {
-    val kmPerLiter: Float? get() = liters?.takeIf { it > MIN_LITERS }?.let { km / it }
+    val litresPer100Km: Float? get() = liters?.takeIf { it > MIN_LITERS && km > 0f }?.let { it * 100f / km }
 
     fun toCsv(): String = listOf(
         start, seconds, "%.2f".format(Locale.US, km), "%.0f".format(Locale.US, maxKmh), "%.0f".format(Locale.US, avgKmh),
@@ -50,7 +50,7 @@ private const val MAX_GAP_MS = 5_000L
 private const val MIN_SECONDS = 60
 private const val MIN_KM = 0.2f
 
-/** Menos gasolina que esto no alcanza para sacar km/L (sale un número sin sentido). */
+/** Menos gasolina que esto no alcanza para sacar L/100 km (sale un número sin sentido). */
 private const val MIN_LITERS = 0.05f
 
 /** Desde esta velocidad cuenta como "en movimiento" para el promedio. */

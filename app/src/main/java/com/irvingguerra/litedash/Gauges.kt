@@ -8,11 +8,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.irvingguerra.litedash.core.ui.Icons
 import com.irvingguerra.litedash.core.vehicle.Signal
+import com.irvingguerra.litedash.core.vehicle.Source
 import com.irvingguerra.litedash.core.vehicle.watch
 import com.irvingguerra.litedash.feature.car.CarStill
 import com.irvingguerra.litedash.feature.obd.CHARGING_MAX_V
 import com.irvingguerra.litedash.feature.obd.HOT_COOLANT_C
-import com.irvingguerra.litedash.feature.obd.ObdState
+import com.irvingguerra.litedash.feature.obd.SpdState
 import com.irvingguerra.litedash.feature.obd.RESTING_MIN_V
 import java.util.Locale
 
@@ -23,7 +24,8 @@ import java.util.Locale
 @Composable
 fun SpeedometerTile(d: Dependencies, look: GaugeLook) {
     // Con un adaptador ya guardado, se reconecta solo (sin abrir el Taller).
-    val obdOn = rememberObd(d)?.state == ObdState.ON
+    rememberObd(d)
+    val obdOn = d.bus.source(Signal.SPEED) == Source.CAN
     val (gps, ask) = rememberGpsPermission(d)
     if (!obdOn && !gps) {
         return ShortcutTile(Icons.speed, stringResource(R.string.tile_speedometer), stringResource(R.string.tap_to_enable), ask)
@@ -54,7 +56,7 @@ fun rememberSpeedFront(d: Dependencies, look: GaugeLook): (@Composable (Modifier
 }
 
 /** De dónde viene la velocidad (OBD, GPS, CAN…: el nombre de su fuente, que ya es la sigla), para la etiqueta del velocímetro. */
-fun speedTag(d: Dependencies) = d.bus.source(Signal.SPEED)?.name.orEmpty()
+fun speedTag(d: Dependencies) = d.bus.source(Signal.SPEED)?.let { if (it == Source.CAN) "SPD" else it.name }.orEmpty()
 
 /**
  * La tarjeta del velocímetro con [speed] ya en la unidad que se ve (km/h o mph): la
@@ -147,8 +149,8 @@ val GaugeSpecs = listOf(
     ),
     GaugeSpec(
         Signal.CONSUMPTION, R.string.gauge_consumption, R.string.gauge_consumption_tag, Icons.drop, ticks = 6,
-        // km/l a millas por galón (EE. UU.).
-        shown = { v, u -> if (u.miles) v * 2.352f else v }, unit = { if (it.miles) R.string.unit_mpg else R.string.unit_kml }, decimals = 1,
+        // Conserva L/100 km también cuando la velocidad y la distancia se muestran en millas.
+        shown = { v, _ -> v }, unit = { R.string.unit_l100km }, decimals = 1,
         min = 0f, max = 30f,
     ),
     GaugeSpec(
@@ -188,8 +190,8 @@ fun GaugeTile(d: Dependencies, signal: String, look: GaugeLook, onPick: () -> Un
     // Con un adaptador ya guardado, se reconecta solo (sin abrir el Taller).
     val obd = rememberObd(d)
     // Sin adaptador (o sin ese dato) se ve igual, vacío y con "—", y una nota corta: no un texto largo.
-    if (obd?.state != ObdState.ON) {
-        val note = stringResource(if (obd?.state == ObdState.CONNECTING) R.string.obd_connecting_short else R.string.gauge_no_obd)
+    if (obd == null || obd.state != SpdState.ON && !obd.canRead(spec.signal)) {
+        val note = stringResource(if (obd?.state == SpdState.CONNECTING) R.string.obd_connecting_short else R.string.gauge_no_obd)
         return SpecGaugeCard(spec, null, d.prefs.units, look, d.prefs.carColor, onClick = onWorkshop, note = note)
     }
     if (!obd.canRead(spec.signal)) return SpecGaugeCard(spec, null, d.prefs.units, look, d.prefs.carColor, onClick = onPick, note = stringResource(R.string.gauge_no_data))

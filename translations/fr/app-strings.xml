@@ -54,14 +54,11 @@
     <string name="accel_clear_best">Effacer le meilleur temps</string>
     <string name="trips_title">Journal des trajets</string>
     <string name="trips_record">Enregistrer les trajets</string>
-    <string name="trips_help">Avec l\'adaptateur OBD connecté, enregistre un résumé de chaque trajet : distance, durée, vitesses, tr/min, température moteur et carburant. Tout reste sur votre écran ; rien n\'en sort.</string>
     <string name="trips_none">Aucun trajet enregistré.</string>
     <string name="trips_export">Exporter en CSV</string>
     <string name="trips_export_failed">Impossible d\'enregistrer le fichier.</string>
     <string name="trip_hours">%1$s h</string>
     <string name="speed_from_gps">%1$s · par GPS</string>
-    <string name="speed_from_obd">%1$s · par OBD</string>
-    <string name="speed_from_can">%1$s · de la voiture</string>
     <string name="trip_avg">moy. %1$s</string>
     <string name="trip_max">max. %1$s</string>
     <string name="tab_split">Écran partagé</string>
@@ -131,8 +128,6 @@
     <string name="templates_tab_road">Route</string>
     <string name="templates_tab_speed">Compteur</string>
     <string name="templates_tab_wallpaper">Fond</string>
-    <string name="templates_road_help">Votre voiture sur la route avec votre vitesse et la distance du trajet (OBD ou GPS).</string>
-    <string name="templates_speed_help">Pas de voiture sur l\'accueil. La vitesse vient du GPS ; pas besoin d\'OBD.</string>
     <string name="templates_wallpaper_help">Votre photo de fond avec quelques cartes par-dessus et l\'heure en surimpression. Choisissez le fond ici ou dans Accueil et apparence.</string>
     <string name="template_map_car">Carte et voiture</string>
     <string name="template_copilot">Copilote</string>
@@ -366,11 +361,7 @@
     <string name="spin_quality_high_costs">Haute · +%s</string>
     <string name="spin_quality_help">Haute = plus d\'images en rotation, plus fluide. Seules les images manquantes sont téléchargées.</string>
     <string name="tile_speedometer">Compteur</string>
-    <string name="tile_speedometer_help">La vitesse dans le style de votre choix · par OBD si connecté, sinon par GPS</string>
     <string name="workshop">Atelier</string>
-    <string name="tile_workshop_help">Raccourci vers l\'Atelier depuis l\'accueil (scanner OBD : codes défaut, préparation au contrôle et capteurs)</string>
-    <string name="obd_adapter">Adaptateur OBD</string>
-    <string name="obd_adapter_help">Branchez un adaptateur ELM327 sur la prise OBD (sous le volant). Bluetooth classique : associez-le dans Paramètres Android → Bluetooth et choisissez-le ici. Bluetooth LE : touchez Rechercher. Wi-Fi : rejoignez son réseau et saisissez son adresse.</string>
     <string name="obd_off">Non connecté</string>
     <string name="obd_connecting">Connexion à %1$s…</string>
     <string name="obd_on">Connecté à %1$s</string>
@@ -483,7 +474,6 @@
     <string name="tab_tiles">Widgets</string>
     <string name="tab_navigation">Navigation</string>
     <string name="favorites_help">Les applis de la barre, dans l\'ordre. Touchez le x pour en retirer une ; cherchez ci-dessous pour en ajouter.</string>
-    <string name="module_obd">Scanner OBD</string>
     <string name="module_notifications">Notifications des autres applis</string>
     <string name="module_location">Position</string>
     <string name="radio_internet_title">Radio internet</string>
@@ -492,7 +482,6 @@
     <string name="system">Système</string>
     <string name="tab_updates">Mises à jour</string>
     <string name="tile_car_help">Votre voiture en 3D ; faites-la tourner du doigt et touchez pour l\'agrandir</string>
-    <string name="tile_road_help">Votre voiture sur la route avec votre vitesse (OBD ou GPS), la distance du trajet et vos pneus</string>
     <string name="tile_image_help">Une de vos photos, comme le logo de votre marque ; sans photo, le logo LiteDash</string>
     <string name="image_title">Image du widget</string>
     <string name="image_help">Choisissez-la dans votre galerie : chaque widget Image a la sienne. LiteDash n\'inclut pas de logos de marque.</string>
@@ -505,14 +494,11 @@
     <string name="intro_no_image">Sans image, le logo LiteDash se construit.</string>
     <string name="unit_kml">km/L</string>
     <string name="tile_gauge">Jauge</string>
-    <string name="tile_gauge_help">Une mesure de la voiture par OBD : tr/min, température moteur, carburant, batterie, consommation, turbo, accélérateur, huile ou débit de carburant</string>
     <string name="gauge_pick">Touchez pour choisir quoi afficher</string>
     <string name="gauge_unsupported">Votre voiture ne communique pas cette donnée</string>
     <string name="speed_title">Vitesse</string>
-    <string name="gauge_no_obd">Pas d\'OBD</string>
     <string name="gauge_no_data">Pas de données</string>
     <string name="pick_gauge">Que voulez-vous voir ?</string>
-    <string name="pick_gauge_help">Lu par l\'adaptateur OBD (connectez-le dans l\'Atelier). Pour le changer plus tard, touchez la jauge.</string>
     <string name="gauge_rpm">Compte-tours</string>
     <string name="gauge_coolant">Temp. moteur</string>
     <string name="gauge_coolant_tag">MOTEUR</string>
@@ -621,16 +607,11 @@
     <string name="radio_internet_help">Stations près de vous par GPS et du monde entier, avec favoris. Nécessite internet ; sans internet, utilisez la radio de votre écran.</string>
     <string name="tab_health">Santé</string>
     <string name="tab_more">Plus</string>
-    <string name="health_title">Santé de la voiture</string>
-    <string name="health_connect">Connectez votre adaptateur OBD pour voir la santé de votre voiture</string>
     <string name="health_all_good">Tout va bien</string>
     <string name="health_good">Bon</string>
     <string name="health_warn">Attention</string>
     <string name="health_fault">Panne</string>
     <string name="health_unknown">Pas de données</string>
-    <string name="health_engine">Santé du moteur</string>
-    <string name="health_connect_short">Connectez votre adaptateur</string>
-    <string name="health_offline">Non connecté</string>
     <string name="health_codes_title">Codes</string>
     <plurals name="health_codes">
         <item quantity="one">%1$d code</item>
@@ -708,11 +689,7 @@
     <string name="tires_grant">Autoriser</string>
     <string name="tires_retry">Réessayer</string>
     <string name="tires_usb_help">Si l\'appli pneus de votre écran s\'empare du récepteur, débranchez-le et rebranchez-le, puis choisissez LiteDash avec « toujours ».</string>
-    <string name="tires_source_obd">Voiture (OBD)</string>
-    <string name="tires_obd_help">Lit les capteurs d\'origine de votre voiture avec l\'adaptateur OBD de l\'Atelier : aucun kit en plus. Toutes les voitures ne les fournissent pas ; l\'essai se fait par marque.</string>
     <string name="tires_obd_connected">Capteurs d\'origine · %1$s</string>
-    <string name="tires_error_obd_off">Connectez votre adaptateur OBD dans l\'Atelier (module OBD activé).</string>
-    <string name="tires_error_obd_unsupported">Votre voiture n\'a pas fourni la pression des pneus par OBD. Envoyez un rapport Pneus → Voiture (OBD) pour que nous ajoutions votre modèle.</string>
     <string name="tires_ble_help">Les capteurs sont captés sans association ; touchez un pneu pour choisir son capteur.</string>
     <string name="tires_arrange">Placer le pneu</string>
     <string name="tires_swap_with">Échanger avec…</string>

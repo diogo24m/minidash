@@ -54,7 +54,7 @@ import com.irvingguerra.litedash.core.vehicle.watch
 import com.irvingguerra.litedash.feature.obd.AccelState
 import com.irvingguerra.litedash.feature.obd.AccelTimer
 import com.irvingguerra.litedash.feature.obd.DerivedSignals
-import com.irvingguerra.litedash.feature.obd.ObdState
+import com.irvingguerra.litedash.feature.obd.SpdState
 import com.irvingguerra.litedash.feature.obd.Pids
 import com.irvingguerra.litedash.feature.obd.TripRecorder
 import com.irvingguerra.litedash.feature.obd.TripStore
@@ -84,7 +84,7 @@ private fun hueDistance(a: Color, b: Color): Float {
 /** Las señales que da este auto (las calculadas y el voltaje incluidos). */
 @Composable
 internal fun readableSignals(d: Dependencies): List<String> =
-    remember(d.obd.supported) { (Pids.map { it.signal } + DerivedSignals.map { it.signal }).distinct().filter(d.obd::canRead) }
+    d.obd.readable.sorted()
 
 /**
  * Gráficas en vivo: una o dos señales de los últimos [SERIES_SECONDS] segundos. Al tocar
@@ -279,7 +279,7 @@ private fun TripRow(t: TripSummary, dates: DateFormat, units: UnitChoice, locale
         add(stringResource(R.string.trip_max, sensorText(Signal.SPEED, t.maxKmh, units, locale)))
         if (t.maxRpm > 0f) add(stringResource(R.string.value_with_unit, String.format(locale, "%.0f", t.maxRpm), stringResource(R.string.unit_rpm)))
         t.maxCoolant?.let { add(sensorText(Signal.COOLANT, it, units, locale)) }
-        t.kmPerLiter?.let { add(sensorText(Signal.CONSUMPTION, it, units, locale)) }
+        t.litresPer100Km?.let { add(sensorText(Signal.CONSUMPTION, it, units, locale)) }
     }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -313,7 +313,7 @@ private val tripSaveScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
  */
 @Composable
 fun TripRecorderEffect(d: Dependencies) {
-    if (rememberObd(d, d.prefs.tripLog)?.state != ObdState.ON) return
+    if (rememberObd(d, d.prefs.tripLog)?.state != SpdState.ON) return
     val context = LocalContext.current
     DisposableEffect(Unit) {
         val signals = tripSignals(d)

@@ -11,6 +11,15 @@ class GaugeSpecTest {
     private fun spec(signal: String) = gaugeOf(signal)!!
 
     @Test
+    fun elConsumoConservaLitrosPorCienKmAunqueLaVelocidadEsteEnMillas() {
+        val consumption = spec(Signal.CONSUMPTION)
+        for (units in listOf(metric, imperial)) {
+            assertEquals(6.5f, consumption.shown(6.5f, units), 0.001f)
+            assertEquals(R.string.unit_l100km, consumption.unit(units))
+        }
+    }
+
+    @Test
     fun lasRevolucionesVanEnMiles() {
         val rpm = spec(Signal.RPM)
         assertEquals((0..8).map { "$it" }, (0..rpm.ticks).map { rpm.label(it, metric, Locale.US) })

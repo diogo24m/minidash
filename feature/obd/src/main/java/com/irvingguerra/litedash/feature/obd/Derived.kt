@@ -23,11 +23,11 @@ private const val FUEL_GRAMS_PER_LITER = 737f
 /** Presión del aire a nivel del mar (kPa), si el auto no la reporta. */
 private const val SEA_LEVEL_KPA = 101.3f
 
-/** Kilómetros por litro con el flujo de aire (MAF) y la velocidad; null parado (no hay km). */
+/** L/100 km con el flujo de aire (MAF) y la velocidad; null parado (no hay km). */
 fun consumption(mafGramsPerSecond: Float, speedKmh: Float): Float? {
     if (speedKmh < 5f || mafGramsPerSecond <= 0f) return null
     val litersPerHour = mafGramsPerSecond * 3600f / (AIR_FUEL * FUEL_GRAMS_PER_LITER)
-    return speedKmh / litersPerHour
+    return litersPerHour * 100f / speedKmh
 }
 
 val DerivedSignals = listOf(
@@ -37,7 +37,7 @@ val DerivedSignals = listOf(
         val speed = v[Signal.SPEED] ?: return@Derived null
         val litersPerHour = v[Signal.FUEL_RATE]
         when {
-            litersPerHour != null && litersPerHour > 0f -> if (speed >= 5f) speed / litersPerHour else null
+            litersPerHour != null && litersPerHour > 0f -> if (speed >= 5f) litersPerHour * 100f / speed else null
             else -> consumption(v[Signal.MAF] ?: return@Derived null, speed)
         }
     },

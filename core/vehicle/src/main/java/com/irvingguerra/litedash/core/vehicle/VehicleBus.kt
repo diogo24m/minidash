@@ -30,7 +30,7 @@ object Signal {
     const val OIL = "oil_temp"                 // °C
     const val FUEL_RATE = "fuel_rate"           // L/h
     // Calculadas de las de arriba (no las da el auto tal cual).
-    const val CONSUMPTION = "consumption"   // km/l
+    const val CONSUMPTION = "consumption"   // L/100 km
     const val BOOST = "boost"           // kPa sobre la presión del aire (negativo = vacío)
 }
 

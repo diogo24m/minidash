@@ -1,6 +1,6 @@
 package com.irvingguerra.litedash
 
-import com.irvingguerra.litedash.feature.obd.ObdError
+import com.irvingguerra.litedash.feature.obd.SpdState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -20,14 +20,16 @@ class WorkshopPartsTest {
     @Test
     fun middlePicksTheRoundedPoint() = assertEquals(4f, pointAt(listOf(1f, 2f, 3f, 4f, 5f), 0.7f, capacity = 5))
 
-    // ---- El error del OBD ----
+    // ---- Estados de la conexión integrada SPD ----
 
     @Test
-    fun everyObdErrorHasItsOwnText() {
-        val texts = ObdError.entries.map(::obdErrorText)
-        assertEquals(ObdError.entries.size, texts.toSet().size)
+    fun everySpdStateHasItsOwnText() {
+        val texts = SpdState.entries.map { spdConnectionText(true, it) }
+        assertEquals(SpdState.entries.size, texts.toSet().size)
     }
 
     @Test
-    fun noKindIsTheGenericText() = assertEquals(obdErrorText(ObdError.UNKNOWN), obdErrorText(null))
+    fun missingServiceAlwaysExplainsThatSPDIsUnavailable() {
+        for (state in SpdState.entries) assertEquals(R.string.spd_unavailable, spdConnectionText(false, state))
+    }
 }

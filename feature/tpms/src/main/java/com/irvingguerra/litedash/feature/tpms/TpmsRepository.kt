@@ -670,8 +670,8 @@ class TpmsRepository(context: Context, private val bus: VehicleBus) {
         obdJob = scope.launch {
             while (isActive) {
                 when (val r = carTires?.read() ?: FactoryTires.NotConnected) {
-                    FactoryTires.NotConnected -> { status = TpmsStatus.NO_DEVICE; error = TpmsError.OBD_OFF }
-                    FactoryTires.Unsupported -> { status = TpmsStatus.NO_DEVICE; error = TpmsError.OBD_UNSUPPORTED }
+                    FactoryTires.NotConnected -> { clearReadings(); status = TpmsStatus.NO_DEVICE; error = TpmsError.OBD_OFF }
+                    FactoryTires.Unsupported -> { clearReadings(); status = TpmsStatus.NO_DEVICE; error = TpmsError.OBD_UNSUPPORTED }
                     is FactoryTires.Values -> {
                         // Contestó aunque los sensores aún no digan nada (parado, recién encendido).
                         error = null
@@ -679,11 +679,13 @@ class TpmsRepository(context: Context, private val bus: VehicleBus) {
                         obdProfile = r.profile
                         val now = System.currentTimeMillis()
                         Wheel.ROAD.forEachIndexed { i, w ->
-                            val kpa = r.kpa.getOrNull(i) ?: return@forEachIndexed
+                            val kpa = r.kpa.getOrNull(i) ?: run { forget(obdSensorId(w)); return@forEachIndexed }
                             ingest(TireReading(obdSensorId(w), kpa, r.tempC.getOrNull(i), null, null, false, false, false, OBD_FAMILY, w, null, now))
                         }
                     }
                 }
+                sensorCount = _readings.size
+                refresh()
                 delay(OBD_INTERVAL_MS)
             }
         }

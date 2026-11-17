@@ -12,7 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.LifecycleStartEffect
-import com.irvingguerra.litedash.feature.obd.ObdRepository
+import com.irvingguerra.litedash.feature.obd.SpdRepository
 
 /**
  * Para las piezas que no tienen nada que cargar: avisa [onReady] una sola vez, en
@@ -25,25 +25,17 @@ fun ReadyNow(onReady: (() -> Unit)?) {
     LaunchedEffect(Unit) { ready?.invoke() }
 }
 
-/**
- * El escáner OBD para una pieza o un aviso que lo quiere ([wanted]: su ajuste prendido). Con
- * adaptador guardado y el módulo prendido dice "lo quiero" mientras está en pantalla (el escáner
- * se conecta solo y, cuando ya nadie lo quiere, se desconecta al rato); devuelve el escáner si ya existe.
- * Sin [wanted] o con el módulo apagado devuelve null y no crea ni conecta nada.
- */
+/** Quiere SPD mientras la pieza lo necesita; conserva la grabación de viajes al abrir otra app. */
 @Composable
-fun rememberObd(d: Dependencies, wanted: Boolean = true): ObdRepository? {
+fun rememberObd(d: Dependencies, wanted: Boolean = true): SpdRepository? {
     val auto = wanted && d.obdAuto
+    val owner = remember { Any() }
     DisposableEffect(auto) {
-        val owner = Any()
         if (auto) d.obd.want(owner)
         onDispose { if (auto) d.obdIfCreated()?.release(owner) }
     }
-    // Al volver a LiteDash (no al aparecer la pieza: el primer inicio no cuenta), si esperaba un reintento, intenta ya.
-    val started = remember { booleanArrayOf(false) }
     LifecycleStartEffect(auto) {
-        if (auto && started[0]) d.obdIfCreated()?.wake()
-        started[0] = true
+        if (auto) d.obd.wake()
         onStopOrDispose { }
     }
     return if (wanted && d.obdModule) d.obdIfCreated() else null

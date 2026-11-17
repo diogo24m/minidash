@@ -50,7 +50,7 @@ import com.irvingguerra.litedash.core.ui.blockTouches
 import com.irvingguerra.litedash.feature.apps.App
 import com.irvingguerra.litedash.feature.apps.AppGrid
 import com.irvingguerra.litedash.feature.dashboard.TileTypes
-import com.irvingguerra.litedash.feature.obd.ObdState
+import com.irvingguerra.litedash.feature.obd.SpdState
 
 /**
  * Paneles a pantalla completa en pantallas muy bajas (8.8" de 1280×480): todo se dibuja más chico para que quepa,
@@ -203,7 +203,7 @@ fun PickAppPanel(d: Dependencies, apps: List<App>, tileId: String?, close: () ->
 @Composable
 fun PickGaugePanel(d: Dependencies, tileId: String?, close: () -> Unit) {
     val c = LocalColors.current
-    val obd = d.obdIfCreated()?.takeIf { it.state == ObdState.ON }
+    val obd = d.obdIfCreated()?.takeIf { it.state == SpdState.ON }
     var noRoom by remember { mutableStateOf(false) }
     PanelScaffold(stringResource(R.string.pick_gauge), close) {
         Label(stringResource(R.string.pick_gauge_help), Typography.body, c.textMuted, modifier = Modifier.padding(bottom = 14.dp))

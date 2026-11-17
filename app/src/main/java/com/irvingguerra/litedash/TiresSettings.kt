@@ -66,7 +66,7 @@ import com.irvingguerra.litedash.core.ui.SwitchRow
 import com.irvingguerra.litedash.core.ui.Typography
 import com.irvingguerra.litedash.core.vehicle.bleScanPermission
 import com.irvingguerra.litedash.feature.dashboard.TileTypes
-import com.irvingguerra.litedash.feature.obd.ObdState
+import com.irvingguerra.litedash.feature.obd.SpdState
 import com.irvingguerra.litedash.feature.tpms.PairState
 import com.irvingguerra.litedash.feature.tpms.PressureUnit
 import com.irvingguerra.litedash.feature.tpms.TireReading
@@ -187,7 +187,7 @@ private fun problemText(d: Dependencies): String? {
         TpmsError.USB_UNPLUGGED -> R.string.tires_error_usb_unplugged
         TpmsError.USB_LOST -> R.string.tires_error_usb_lost
         TpmsError.SWAP_UNCONFIRMED -> R.string.tires_error_swap
-        TpmsError.OBD_OFF -> d.obdIfCreated()?.takeIf { it.state == ObdState.ERROR }?.let { obdErrorText(it.errorKind) } ?: R.string.tires_error_obd_off
+        TpmsError.OBD_OFF -> R.string.tires_error_obd_off
         TpmsError.OBD_UNSUPPORTED -> R.string.tires_error_obd_unsupported
     }
     return res?.let { stringResource(it) }

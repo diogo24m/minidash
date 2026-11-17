@@ -84,7 +84,7 @@ private enum class ReportModule(val key: String, val title: Int, val details: Li
     CAR("car", R.string.tile_car),
     // Con OBD: el aviso de Llantas por OBD pide justo este reporte para agregar el modelo.
     TIRES("tires", R.string.tires, listOf(ReportDetail.USB_RECEIVER, ReportDetail.BLUETOOTH, ReportDetail.CAR_OBD)),
-    WORKSHOP("workshop", R.string.report_workshop, listOf(ReportDetail.BLUETOOTH, ReportDetail.WIFI, ReportDetail.USB)),
+    WORKSHOP("workshop", R.string.report_workshop, listOf(ReportDetail.CAR_OBD)),
     MAP("map", R.string.templates_tab_map),
     SPLIT("split", R.string.tab_split),
     PROJECTION("projection", R.string.report_projection),
@@ -287,7 +287,7 @@ private const val TAG = "Reports"
 private suspend fun reportInfo(context: Context, d: Dependencies): String {
     val layout = d.dashboard.describe()
     // El escáner solo si ya existe (abrir el Taller lo crea); si no, no se conecta nada por el reporte.
-    val obdInfo = (d.obdIfCreated()?.describe() ?: "OBD: sin abrir en esta sesión") + "\n" + reportExtras(d)
+    val obdInfo = (d.obdIfCreated()?.describe() ?: "SPD: sin abrir en esta sesión") + "\n" + reportExtras(d)
     val pro = d.pro.isPro
     // Lo de la música que cambia en el hilo principal se copia aquí; lo que pregunta al sistema va en IO.
     val musicInfoLater = d.music.describeLater()

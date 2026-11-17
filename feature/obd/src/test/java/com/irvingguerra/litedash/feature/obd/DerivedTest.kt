@@ -8,11 +8,11 @@ import org.junit.Test
 class DerivedTest {
     @Test
     fun consumoConMafYVelocidad() {
-        // 5 g/s a 100 km/h ≈ 1.66 L/h → ~60 km/l (en carretera, motor chico).
-        val kml = consumption(5f, 100f)!!
-        assertEquals(60.2f, kml, 0.5f)
-        // Más aire a la misma velocidad = más gasolina = menos km/l.
-        assert(consumption(15f, 100f)!! < kml)
+        // 5 g/s a 100 km/h ≈ 1.66 L/h → 1.66 L/100 km (en carretera, motor chico).
+        val litresPer100Km = consumption(5f, 100f)!!
+        assertEquals(1.66f, litresPer100Km, 0.01f)
+        // Más aire a la misma velocidad = más gasolina por cada 100 km.
+        assert(consumption(15f, 100f)!! > litresPer100Km)
     }
 
     @Test
@@ -24,11 +24,11 @@ class DerivedTest {
     @Test
     fun consumoPrefiereElGastoDeGasolina() {
         val consumo = DerivedSignals.first { it.signal == Signal.CONSUMPTION }
-        // 100 km/h gastando 5 L/h = 20 km/l, aunque el MAF diga otra cosa.
-        assertEquals(20f, consumo.compute(mapOf(Signal.SPEED to 100f, Signal.FUEL_RATE to 5f, Signal.MAF to 5f))!!, 0.01f)
+        // 100 km/h gastando 5 L/h = 5 L/100 km, aunque el MAF diga otra cosa.
+        assertEquals(5f, consumo.compute(mapOf(Signal.SPEED to 100f, Signal.FUEL_RATE to 5f, Signal.MAF to 5f))!!, 0.01f)
         // Sin gasto de gasolina, la cuenta con el MAF.
-        assertEquals(60.2f, consumo.compute(mapOf(Signal.SPEED to 100f, Signal.MAF to 5f))!!, 0.5f)
-        // Parado no hay km/l.
+        assertEquals(1.66f, consumo.compute(mapOf(Signal.SPEED to 100f, Signal.MAF to 5f))!!, 0.01f)
+        // Parado no hay L/100 km.
         assertNull(consumo.compute(mapOf(Signal.SPEED to 0f, Signal.FUEL_RATE to 1f)))
     }
 

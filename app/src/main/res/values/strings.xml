@@ -53,14 +53,14 @@
     <string name="accel_clear_best">Borrar mejor tiempo</string>
     <string name="trips_title">Registro de viajes</string>
     <string name="trips_record">Registrar viajes</string>
-    <string name="trips_help">Con el adaptador OBD conectado, guarda un resumen de cada viaje: distancia, tiempo, velocidades, revoluciones, temperatura del motor y gasolina. Se queda en tu pantalla; nada sale de ella.</string>
+    <string name="trips_help">Guarda cada viaje con las lecturas disponibles del SPD: distancia, tiempo y velocidad. Se queda en tu pantalla.</string>
     <string name="trips_none">Todavía no hay viajes guardados.</string>
     <string name="trips_export">Exportar a CSV</string>
     <string name="trips_export_failed">No se pudo guardar el archivo.</string>
     <string name="trip_hours">%1$s h</string>
     <string name="speed_from_gps">%1$s · del GPS</string>
-    <string name="speed_from_obd">%1$s · del OBD</string>
-    <string name="speed_from_can">%1$s · del auto</string>
+    <string name="speed_from_obd">%1$s · del SPD</string>
+    <string name="speed_from_can">%1$s · del SPD</string>
     <string name="trip_avg">prom. %1$s</string>
     <string name="trip_max">máx. %1$s</string>
     <string name="tab_split">Pantalla dividida</string>
@@ -131,8 +131,8 @@
     <string name="templates_tab_road">Carretera</string>
     <string name="templates_tab_speed">Velocímetro</string>
     <string name="templates_tab_wallpaper">Fondo</string>
-    <string name="templates_road_help">Tu auto en carretera con la velocidad y los km del viaje (OBD o GPS).</string>
-    <string name="templates_speed_help">Sin auto en el inicio. La velocidad sale del GPS; no necesitas OBD.</string>
+    <string name="templates_road_help">Tu auto con velocidad y distancia del viaje (SPD o GPS)</string>
+    <string name="templates_speed_help">Velocidad por GPS o SPD, sin auto en el inicio</string>
     <string name="templates_wallpaper_help">Tu foto de fondo con unas cuantas tarjetas encima y la hora flotando. Elige el fondo aquí o en Inicio y apariencia.</string>
     <string name="template_map_car">Mapa y auto</string>
     <string name="template_copilot">Copiloto</string>
@@ -375,11 +375,11 @@
     <string name="spin_quality_help">Alta = más cuadros al girar, más suave. Solo se bajan los que faltan.</string>
     <!-- Escáner OBD (Taller) y velocímetro -->
     <string name="tile_speedometer">Velocímetro</string>
-    <string name="tile_speedometer_help">Velocidad en el estilo que quieras · del OBD si está conectado; si no, del GPS</string>
+    <string name="tile_speedometer_help">Velocidad del SPD cuando está disponible; si no, del GPS</string>
     <string name="workshop">Taller</string>
-    <string name="tile_workshop_help">Acceso directo en tu inicio al Taller (escáner OBD: códigos de falla, verificación y sensores)</string>
-    <string name="obd_adapter">Adaptador OBD</string>
-    <string name="obd_adapter_help">Conecta un adaptador ELM327 al puerto OBD (abajo del volante). Bluetooth clásico: emparéjalo en Ajustes de Android → Bluetooth y elígelo aquí. Bluetooth LE: toca Buscar. Wi-Fi: conéctate a su red y escribe su dirección.</string>
+    <string name="tile_workshop_help">Datos, mantenimiento y diagnósticos del servicio SPD</string>
+    <string name="obd_adapter">Servicio SPD</string>
+    <string name="obd_adapter_help">Lee el servicio integrado de la central. La velocidad usa el perfil BMW MINI; no necesita un adaptador externo.</string>
     <string name="obd_off">Sin conectar</string>
     <string name="obd_connecting">Conectando con %1$s…</string>
     <string name="obd_on">Conectado a %1$s</string>
@@ -497,7 +497,7 @@
     <string name="tab_tiles">Widgets</string>
     <string name="tab_navigation">Navegación</string>
     <string name="favorites_help">Las apps de la barra, en su orden. Toca la x para quitar una; búscala aquí abajo para agregarla.</string>
-    <string name="module_obd">Escáner OBD</string>
+    <string name="module_obd">Datos del carro por SPD</string>
     <string name="module_notifications">Avisos de otras apps</string>
     <string name="module_location">Ubicación</string>
     <string name="radio_internet_title">Radio por internet</string>
@@ -507,7 +507,7 @@
     <string name="tab_updates">Actualizaciones</string>
     <string name="tab_about">Acerca de</string>
     <string name="tile_car_help">Tu auto en 3D; gíralo con el dedo y un toque lo agranda</string>
-    <string name="tile_road_help">Tu auto en carretera con la velocidad (OBD o GPS), los km del viaje y tus llantas</string>
+    <string name="tile_road_help">Tu auto en carretera con velocidad SPD o GPS, viaje y llantas</string>
     <string name="tile_image_help">Una foto tuya, como el logo de tu marca; sin foto, el logo de LiteDash</string>
     <string name="image_title">Imagen del widget</string>
     <string name="image_help">Elígela de tu galería: cada widget de imagen tiene la suya. LiteDash no trae logos de marcas.</string>
@@ -523,6 +523,7 @@
     <string name="unit_f" translatable="false">°F</string>
     <string name="unit_percent" formatted="false" translatable="false">%</string>
     <string name="unit_volts" translatable="false">V</string>
+    <string name="unit_l100km">L/100 km</string>
     <string name="unit_kml">km/l</string>
     <string name="unit_mpg" translatable="false">mpg</string>
     <string name="unit_psi" translatable="false">psi</string>
@@ -531,14 +532,14 @@
     <string name="unit_gs" translatable="false">g/s</string>
     <string name="unit_galh" translatable="false">gal/h</string>
     <string name="tile_gauge">Medidor</string>
-    <string name="tile_gauge_help">Un dato del auto por OBD: revoluciones, temperatura, gasolina, batería, consumo, turbo, acelerador, aceite o gasto de gasolina</string>
+    <string name="tile_gauge_help">Un dato validado del servicio SPD: batería o consumo</string>
     <string name="gauge_pick">Toca para elegir qué mostrar</string>
     <string name="gauge_unsupported">Tu auto no da este dato</string>
     <string name="speed_title">Velocidad</string>
-    <string name="gauge_no_obd">Sin OBD</string>
+    <string name="gauge_no_obd">Sin SPD</string>
     <string name="gauge_no_data">Sin dato</string>
     <string name="pick_gauge">¿Qué quieres ver?</string>
-    <string name="pick_gauge_help">Lo lee el adaptador OBD (se conecta en el Taller). Para cambiarlo después, toca el medidor.</string>
+    <string name="pick_gauge_help">Datos del servicio SPD de la central. Los campos no validados aparecen solo en Diagnóstico SPD.</string>
     <string name="gauge_rpm">Tacómetro</string>
     <string name="gauge_coolant">Temp. del motor</string>
     <string name="gauge_coolant_tag">MOTOR</string>
@@ -650,16 +651,16 @@
     <string name="radio_internet_help">Estaciones de tu zona por GPS y de todo el mundo, con favoritas. Necesita internet; si no tienes, usa la radio de tu pantalla.</string>
     <string name="tab_health">Salud</string>
     <string name="tab_more">Más</string>
-    <string name="health_title">Salud del auto</string>
-    <string name="health_connect">Conecta tu adaptador OBD para ver la salud de tu auto</string>
+    <string name="health_title">Datos del carro</string>
+    <string name="health_connect">Activa los datos SPD para ver las lecturas de tu auto</string>
     <string name="health_all_good">Todo bien</string>
     <string name="health_good">Bien</string>
     <string name="health_warn">Atención</string>
     <string name="health_fault">Falla</string>
     <string name="health_unknown">Sin datos</string>
-    <string name="health_engine">Salud del motor</string>
-    <string name="health_connect_short">Conecta tu adaptador</string>
-    <string name="health_offline">Sin conexión</string>
+    <string name="health_engine">Datos del carro</string>
+    <string name="health_connect_short">Activa SPD en el Taller</string>
+    <string name="health_offline">Sin conexión SPD</string>
     <string name="health_codes_title">Códigos</string>
     <plurals name="health_codes">
         <item quantity="one">%1$d código</item>
@@ -741,11 +742,11 @@
     <string name="tires_grant">Dar permiso</string>
     <string name="tires_retry">Reintentar</string>
     <string name="tires_usb_help">Si la app de llantas de tu pantalla se queda con el receptor, desconéctalo y vuelve a conectarlo, y elige LiteDash con «usar siempre».</string>
-    <string name="tires_source_obd">Auto (OBD)</string>
-    <string name="tires_obd_help">Lee los sensores de fábrica de tu auto con el adaptador OBD del Taller: no hace falta otro kit. No todos los autos lo dan; se prueba según la marca.</string>
+    <string name="tires_source_obd">Auto (SPD)</string>
+    <string name="tires_obd_help">Lee las presiones del servicio SPD integrado, cuando el carro las proporciona.</string>
     <string name="tires_obd_connected">Sensores de fábrica · %1$s</string>
-    <string name="tires_error_obd_off">Conecta tu adaptador OBD en el Taller (con el módulo OBD prendido).</string>
-    <string name="tires_error_obd_unsupported">Tu auto no dio la presión por OBD. Manda un reporte de Llantas → Auto (OBD) para agregar tu modelo.</string>
+    <string name="tires_error_obd_off">Activa los datos SPD en el Taller.</string>
+    <string name="tires_error_obd_unsupported">El servicio SPD no dio una lectura válida de las presiones.</string>
     <string name="tires_ble_help">Los sensores se oyen aunque no estén emparejados; toca una llanta para elegir el suyo.</string>
     <string name="tires_arrange">Acomodar llanta</string>
     <string name="tires_swap_with">Intercambiar con…</string>
@@ -849,4 +850,49 @@
     <string name="bar_size_small">Compacta</string>
     <string name="bar_size_normal">Normal</string>
     <string name="bar_size_large">Grande</string>
+
+    <!-- Lectura integrada SPD -->
+    <string name="spd_connection">Conexión SPD</string>
+    <string name="spd_connection_help">Lee el servicio integrado de la central. La velocidad usa el perfil BMW MINI; no necesita un adaptador externo.</string>
+    <string name="spd_unavailable">Esta central no tiene el servicio SPD. El velocímetro puede usar el GPS.</string>
+    <string name="spd_connected">Conectado al servicio SPD</string>
+    <string name="spd_failed">El servicio SPD no respondió. Toca Conectar para reintentar.</string>
+    <string name="spd_vehicle">Datos del vehículo</string>
+    <string name="spd_diagnostics">Diagnóstico SPD</string>
+    <string name="spd_diagnostics_help">Lecturas brutas en validación: los códigos de marcha, régimen, frenos y aceite no se interpretan como mediciones confirmadas. SPD no ofrece códigos de falla ni borrado OBD.</string>
+    <string name="spd_stale">Las lecturas llevan más de 30 segundos sin actualizarse.</string>
+    <string name="spd_obd_unavailable">Diagnóstico OBD no disponible por SPD</string>
+    <string name="spd_fuel_litres">Combustible restante</string>
+    <string name="spd_range">Autonomía</string>
+    <string name="spd_odometer">Cuentakilómetros</string>
+    <string name="spd_average_speed">Velocidad media</string>
+    <string name="spd_maintenance">Mantenimiento del carro</string>
+    <string name="spd_service_oil">Aceite del motor</string>
+    <string name="spd_service_inspection">Inspección del vehículo</string>
+    <string name="spd_service_brakes">Líquido de frenos</string>
+    <string name="spd_service_ok">OK</string>
+    <string name="spd_service_unknown">Estado no disponible</string>
+    <string name="spd_service_details">%1$s · %2$s restantes · %3$s</string>
+    <string name="spd_front_left">Puerta delantera izquierda</string>
+    <string name="spd_front_right">Puerta delantera derecha</string>
+    <string name="spd_rear_left">Puerta trasera izquierda</string>
+    <string name="spd_rear_right">Puerta trasera derecha</string>
+    <string name="spd_trunk">Maletero</string>
+    <string name="spd_hood">Capó</string>
+    <string name="spd_open">Abierto</string>
+    <string name="spd_closed">Cerrado</string>
+    <string name="spd_field">%1$s: %2$s</string>
+    <string name="spd_check">Avisos Check Control</string>
+    <string name="spd_acc">Ignición / ACC</string>
+    <string name="spd_brake">Freno de pie</string>
+    <string name="spd_handbrake">Freno de mano</string>
+    <string name="spd_parking">Estacionamiento</string>
+    <string name="spd_gear">Marcha (valor bruto)</string>
+    <string name="spd_rpm_100004">Régimen bruto · 100004</string>
+    <string name="spd_rpm_100042">Régimen bruto · 100042</string>
+    <string name="spd_rpm_120340">Régimen bruto · 120340</string>
+    <string name="spd_lights">Luces</string>
+    <string name="spd_brightness">Brillo de las luces</string>
+    <string name="spd_oil">Nivel de aceite (valor bruto)</string>
+    <string name="unit_litres">L</string>
 </resources>

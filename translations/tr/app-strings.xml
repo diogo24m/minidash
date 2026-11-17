@@ -54,14 +54,11 @@
     <string name="accel_clear_best">En iyi süreyi sil</string>
     <string name="trips_title">Yolculuk kaydı</string>
     <string name="trips_record">Yolculukları kaydet</string>
-    <string name="trips_help">OBD adaptörü bağlıyken her yolculuğun özetini kaydeder: mesafe, süre, hızlar, devir, motor sıcaklığı ve yakıt. Ekranınızda kalır; hiçbir şey dışarı çıkmaz.</string>
     <string name="trips_none">Henüz kayıtlı yolculuk yok.</string>
     <string name="trips_export">CSV olarak dışa aktar</string>
     <string name="trips_export_failed">Dosya kaydedilemedi.</string>
     <string name="trip_hours">%1$s sa</string>
     <string name="speed_from_gps">%1$s · GPS\'ten</string>
-    <string name="speed_from_obd">%1$s · OBD\'den</string>
-    <string name="speed_from_can">%1$s · araçtan</string>
     <string name="trip_avg">ort. %1$s</string>
     <string name="trip_max">maks. %1$s</string>
     <string name="tab_split">Bölünmüş ekran</string>
@@ -131,8 +128,6 @@
     <string name="templates_tab_road">Yol</string>
     <string name="templates_tab_speed">Hız göstergesi</string>
     <string name="templates_tab_wallpaper">Arka plan</string>
-    <string name="templates_road_help">Hızınız ve yolculuk mesafenizle yolda aracınız (OBD veya GPS).</string>
-    <string name="templates_speed_help">Ana ekranda araç yok. Hız GPS\'ten gelir; OBD gerekmez.</string>
     <string name="templates_wallpaper_help">Arka plan fotoğrafınız, üstünde birkaç kart ve havada süzülen saat. Arka planı burada veya Ana ekran ve görünüm\'de seçin.</string>
     <string name="template_map_car">Harita ve araç</string>
     <string name="template_copilot">Yardımcı pilot</string>
@@ -366,11 +361,7 @@
     <string name="spin_quality_high_costs">Yüksek · +%s</string>
     <string name="spin_quality_help">Yüksek = dönerken daha fazla kare, daha akıcı. Yalnızca eksik olanlar indirilir.</string>
     <string name="tile_speedometer">Hız göstergesi</string>
-    <string name="tile_speedometer_help">Beğendiğiniz stilde hız · bağlıyken OBD\'den, değilse GPS\'ten</string>
     <string name="workshop">Servis</string>
-    <string name="tile_workshop_help">Servis\'e ana ekran kısayolu (OBD tarayıcı: arıza kodları, muayene hazırlığı ve sensörler)</string>
-    <string name="obd_adapter">OBD adaptörü</string>
-    <string name="obd_adapter_help">OBD soketine (direksiyonun altında) bir ELM327 adaptörü takın. Klasik Bluetooth: Android Ayarlar → Bluetooth\'ta eşleştirin ve burada seçin. Bluetooth LE: Ara\'ya dokunun. Wi-Fi: ağına bağlanın ve adresini yazın.</string>
     <string name="obd_off">Bağlı değil</string>
     <string name="obd_connecting">%1$s cihazına bağlanılıyor…</string>
     <string name="obd_on">%1$s cihazına bağlı</string>
@@ -487,7 +478,6 @@
     <string name="tab_tiles">Widget\'lar</string>
     <string name="tab_navigation">Navigasyon</string>
     <string name="favorites_help">Çubuktaki uygulamalar, sırasıyla. Birini kaldırmak için x\'e dokunun; eklemek için aşağıda arayın.</string>
-    <string name="module_obd">OBD tarayıcı</string>
     <string name="module_notifications">Diğer uygulamaların bildirimleri</string>
     <string name="module_location">Konum</string>
     <string name="radio_internet_title">İnternet radyosu</string>
@@ -497,7 +487,6 @@
     <string name="tab_about">Hakkında</string>
     <string name="tab_updates">Güncellemeler</string>
     <string name="tile_car_help">3D aracınız; parmağınızla döndürün, büyütmek için dokunun</string>
-    <string name="tile_road_help">Hızınız (OBD veya GPS), yolculuk mesafeniz ve lastiklerinizle yolda aracınız</string>
     <string name="tile_image_help">Markanızın logosu gibi bir fotoğrafınız; yoksa LiteDash logosu</string>
     <string name="image_title">Widget görseli</string>
     <string name="image_help">Galerinizden seçin: her görsel widget\'ının kendi görseli olur. LiteDash marka logoları içermez.</string>
@@ -510,14 +499,11 @@
     <string name="intro_no_image">Görsel yoksa LiteDash logosu kendini oluşturur.</string>
     <string name="unit_kml">km/L</string>
     <string name="tile_gauge">Gösterge</string>
-    <string name="tile_gauge_help">OBD ile bir araç değeri: devir, motor sıcaklığı, yakıt, akü, tüketim, turbo basıncı, gaz pedalı, yağ veya yakıt debisi</string>
     <string name="gauge_pick">Neyin gösterileceğini seçmek için dokunun</string>
     <string name="gauge_unsupported">Aracınız bunu bildirmiyor</string>
     <string name="speed_title">Hız</string>
-    <string name="gauge_no_obd">OBD yok</string>
     <string name="gauge_no_data">Veri yok</string>
     <string name="pick_gauge">Ne görmek istersiniz?</string>
-    <string name="pick_gauge_help">OBD adaptörüyle okunur (Servis\'ten bağlayın). Sonra değiştirmek için göstergeye dokunun.</string>
     <string name="gauge_rpm">Devir göstergesi</string>
     <string name="gauge_coolant">Motor sıcaklığı</string>
     <string name="gauge_coolant_tag">MOTOR</string>
@@ -626,16 +612,11 @@
     <string name="radio_internet_help">GPS ile yakınınızdaki ve dünyanın dört bir yanındaki istasyonlar, favorilerle. İnternet gerekir; yoksa ekranınızın radyosunu kullanın.</string>
     <string name="tab_health">Sağlık</string>
     <string name="tab_more">Daha fazla</string>
-    <string name="health_title">Araç sağlığı</string>
-    <string name="health_connect">Aracınızın sağlığını görmek için OBD adaptörünüzü bağlayın</string>
     <string name="health_all_good">Her şey yolunda</string>
     <string name="health_good">İyi</string>
     <string name="health_warn">Dikkat</string>
     <string name="health_fault">Arıza</string>
     <string name="health_unknown">Veri yok</string>
-    <string name="health_engine">Motor sağlığı</string>
-    <string name="health_connect_short">Adaptörünüzü bağlayın</string>
-    <string name="health_offline">Bağlı değil</string>
     <string name="health_codes_title">Kodlar</string>
     <plurals name="health_codes">
         <item quantity="one">%1$d kod</item>
@@ -713,11 +694,7 @@
     <string name="tires_grant">İzin ver</string>
     <string name="tires_retry">Tekrar dene</string>
     <string name="tires_usb_help">Ekranınızın kendi lastik uygulaması alıcıyı ele geçirirse çıkarıp yeniden takın ve “her zaman” ile LiteDash\'i seçin.</string>
-    <string name="tires_source_obd">Araç (OBD)</string>
-    <string name="tires_obd_help">Aracınızın fabrika sensörlerini Servis\'teki OBD adaptörüyle okur: ek kit gerekmez. Her araç vermez; markaya göre denenir.</string>
     <string name="tires_obd_connected">Fabrika sensörleri · %1$s</string>
-    <string name="tires_error_obd_off">OBD adaptörünüzü Servis\'ten bağlayın (OBD modülü açıkken).</string>
-    <string name="tires_error_obd_unsupported">Aracınız OBD üzerinden lastik basıncı vermedi. Modelinizi ekleyebilmemiz için Lastikler → Araç (OBD) raporu gönderin.</string>
     <string name="tires_ble_help">Sensörler eşleştirme olmadan duyulur; sensörünü seçmek için bir lastiğe dokunun.</string>
     <string name="tires_arrange">Lastiği düzenle</string>
     <string name="tires_swap_with">Şununla değiştir…</string>

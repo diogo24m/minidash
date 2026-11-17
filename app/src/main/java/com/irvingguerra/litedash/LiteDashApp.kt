@@ -11,7 +11,7 @@ import android.service.notification.StatusBarNotification
 import kotlin.concurrent.thread
 import com.irvingguerra.litedash.core.vehicle.Signal
 import com.irvingguerra.litedash.core.vehicle.VehicleBus
-import com.irvingguerra.litedash.feature.obd.ObdRepository
+import com.irvingguerra.litedash.feature.obd.SpdRepository
 import com.irvingguerra.litedash.feature.tpms.CarTires
 import com.irvingguerra.litedash.feature.tpms.TpmsRepository
 import com.irvingguerra.litedash.feature.tpms.UsbAttachActivity
@@ -65,6 +65,7 @@ class LiteDashApp : Application() {
         // Las conocidas y la elegida en Ajustes aunque no sea de ellas (al cambiarla se nota sin reiniciar).
         val listensTo = { pkg: String -> pkg in mapPackages || pkg == prefs.mapApp?.substringBefore('/') }
         val bus = VehicleBus()
+        val spdAvailable = SpdRepository.available(this)
         val music = MusicRepository(this).apply { opener = SplitScreen::open
             returnHome = { MainActivity.bringToFront(this@LiteDashApp) } }
         OwnPlayer.wire(this, music)
@@ -93,8 +94,8 @@ class LiteDashApp : Application() {
             stats = Stats(this) { prefs.stats },
             pro = ProAccess(this),
             bus = bus,
-            obdLazy = lazy { ObdRepository(this, bus) },
-            obdSaved = { ObdRepository.hasSavedTarget(this) },
+            obdLazy = lazy { SpdRepository(this, bus) },
+            obdSaved = { spdAvailable },
             tpmsLazy = lazy {
                 TpmsRepository(this, bus).apply {
                     carTires = object : CarTires {
@@ -158,19 +159,14 @@ class LiteDashApp : Application() {
         super.onConfigurationChanged(newConfig)
     }
 
-    // Referencia fuerte: Android guarda los oyentes de preferencias como referencias débiles.
-    // Solo importan la fuente de llantas ("source"), el tipo de adaptador OBD ("type") y el módulo OBD.
+    // Referencia fuerte: Android conserva los oyentes de preferencias como referencias débiles.
     private val onUsbPrefs = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == null || key == "source" || key == "type" || key == PrefKeys.OBD_MODULE) syncReceivers()
+        if (key == null || key == "source") syncReceivers()
     }
 
-    /**
-     * "Usar LiteDash con este USB" solo mientras alguien lo usa: las llantas por USB o un cable
-     * OBD USB guardado con el módulo prendido. Se revisa al arrancar (fuera del hilo principal:
-     * lee del disco) y cada vez que cambian esos ajustes.
-     */
+    /** Ofrece abrir LiteDash al conectar un receptor de presión USB configurado. */
     private fun watchUsbOffer() {
-        for (file in arrayOf(TpmsRepository.PREFS, ObdRepository.PREFS, PrefKeys.FILE)) {
+        for (file in arrayOf(TpmsRepository.PREFS, PrefKeys.FILE)) {
             getSharedPreferences(file, Context.MODE_PRIVATE).registerOnSharedPreferenceChangeListener(onUsbPrefs)
         }
         syncReceivers()
@@ -180,9 +176,7 @@ class LiteDashApp : Application() {
         Thread({ synchronized(onUsbPrefs) {
             // El receptor de "Abrir al encender" igual que su opción (por si se restauró un respaldo).
             BootLaunch.sync(this, BootLaunch.enabled(this))
-            val settings = getSharedPreferences(PrefKeys.FILE, Context.MODE_PRIVATE)
-            val obdOn = !settings.contains(PrefKeys.OBD_MODULE) || settings.getBoolean(PrefKeys.OBD_MODULE, false)
-            UsbAttachActivity.offer(this, TpmsRepository.usesUsb(this) || obdOn && ObdRepository.hasUsbTarget(this))
+            UsbAttachActivity.offer(this, TpmsRepository.usesUsb(this))
         } }, "sync-receivers").start()
     }
 }
