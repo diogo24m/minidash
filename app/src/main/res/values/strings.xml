@@ -550,6 +550,7 @@
     <string name="module_local_network">Red local</string>
     <string name="module_files">Música y archivos</string>
     <string name="module_tpms">Llantas</string>
+    <string name="module_spd">Caja CAN de la pantalla</string>
     <string name="tab_permissions">Permisos</string>
     <string name="about_help">Acerca de y ayuda</string>
     <string name="tab_updates">Actualizaciones</string>

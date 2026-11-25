@@ -4,6 +4,13 @@ Todos los cambios que nota quien usa LiteDash. Formato
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/), versiones
 [SemVer](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### Nuevo
+- **Caja CAN de la pantalla** (módulo nuevo, apagado de fábrica): en pantallas SPD donde está comprobada (por ahora,
+  con el perfil BMW MINI), el velocímetro y los medidores de gasolina y batería leen el auto por la caja CAN de la
+  pantalla, sin OBD ni GPS. Se prende en Ajustes → Módulos, que solo lo muestra en esas pantallas.
+
 ## [1.5.20] - 2026-11-25
 
 Diseños: cambia todo tu inicio de un toque. Y la ruta con internet ya funciona en pantallas con Android 9 o anterior.

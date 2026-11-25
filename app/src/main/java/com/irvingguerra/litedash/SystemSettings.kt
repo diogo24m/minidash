@@ -196,6 +196,11 @@ internal fun Modules(d: Dependencies, revision: Int, open: (SettingsSection) -> 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (permissions) return@Column Permissions(d, revision)
         ModuleRow(Icons.engine, stringResource(R.string.module_obd), d.obdModule, { d.obdModule = it }) { open(SettingsSection.WORKSHOP) }
+        // La caja CAN de la pantalla: solo donde está comprobada (saberlo pregunta al sistema, fuera del hilo principal);
+        // prendida se ve siempre, para poder apagarla.
+        val context = LocalContext.current
+        val spdSupported by produceState(false) { value = withContext(Dispatchers.IO) { SpdCar.supported(context) } }
+        if (spdSupported || d.spdModule) ModuleRow(Icons.car, stringResource(R.string.module_spd), d.spdModule, { d.spdModule = it })
         // Llantas: prendido = hay una fuente (sin crear el módulo para saberlo). Al prender vuelve
         // la última que se usó; si nunca hubo, a elegirla en Ajustes → Llantas.
         ModuleRow(Icons.tire, stringResource(R.string.module_tpms), d.hasTpmsSource, { on ->

@@ -114,6 +114,8 @@ class LiteDashApp : Application() {
                 }
             },
             tpmsSaved = { TpmsRepository.hasSavedSource(this) },
+            // Solo con su módulo prendido y una pieza que la muestre (rememberSpd); el GPS, para no creerle un 0 andando.
+            spdLazy = lazy { SpdCar(this, bus) { dependencies.trip.speedKmh } },
             phoneLazy = phoneLazy,
         )
     }

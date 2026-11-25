@@ -231,6 +231,7 @@ class Dependencies(
     private val obdSaved: () -> Boolean,
     private val tpmsLazy: Lazy<TpmsRepository>,
     private val tpmsSaved: () -> Boolean,
+    private val spdLazy: Lazy<SpdCar>,
     private val phoneLazy: Lazy<PhoneLink>,
 ) {
     /** Estado de Compose: las piezas que preguntaron antes de que existiera se vuelven a dibujar. */
@@ -259,6 +260,22 @@ class Dependencies(
 
     /** El escáner si ya existe, sin crearlo (una pieza solo quiere saber si está conectado). */
     fun obdIfCreated(): ObdRepository? = if (obdCreated.value) obdLazy.value else null
+
+    /**
+     * El módulo «Caja CAN de la pantalla» (apagado de fábrica; Ajustes → Módulos lo ofrece solo donde está comprobada).
+     * Apagado no crea ni conecta nada.
+     */
+    var spdModule: Boolean
+        get() = prefs.spdModule
+        set(on) {
+            prefs.spdModule = on
+        }
+
+    /** La caja CAN de la pantalla: se crea la primera vez que una pieza la pide con su módulo prendido ([rememberSpd]). */
+    val spd: SpdCar get() = spdLazy.value
+
+    /** La caja CAN si ya existe, sin crearla (para el reporte). */
+    fun spdIfCreated(): SpdCar? = if (spdLazy.isInitialized()) spdLazy.value else null
 
     /**
      * El enlace con LiteDash Connect (Ajustes → Celular). Se arma al volver a LiteDash solo si hay un celular
@@ -432,12 +449,13 @@ private fun Modifier.expandable(p: Tile, actions: TileActions) =
 
 /**
  * El módulo apagado del que depende una pieza (su nombre), o null si se puede ver: el Taller y
- * los medidores son del OBD y la pieza Llantas de Llantas. Esas piezas no se ven ni apartan su
- * lugar ([DashboardState.hidden]) y no se ofrecen para agregar. La pieza Clima no: el clima viene
- * apagado, las plantillas la traen y desde ella se prende.
+ * los medidores son del OBD (los medidores también de la caja CAN de la pantalla) y la pieza Llantas de Llantas. Esas
+ * piezas no se ven ni apartan su lugar ([DashboardState.hidden]) y no se ofrecen para agregar. La pieza Clima no: el
+ * clima viene apagado, las plantillas la traen y desde ella se prende.
  */
 fun moduleOff(d: Dependencies, type: String): Int? = when (type) {
-    TileTypes.WORKSHOP, TileTypes.GAUGE -> R.string.module_obd.takeIf { !d.obdModule }
+    TileTypes.WORKSHOP -> R.string.module_obd.takeIf { !d.obdModule }
+    TileTypes.GAUGE -> R.string.module_obd.takeIf { !d.obdModule && !d.spdModule }
     TileTypes.TIRES -> R.string.module_tpms.takeIf { !d.hasTpmsSource }
     else -> null
 }

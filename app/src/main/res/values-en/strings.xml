@@ -541,6 +541,7 @@
     <string name="module_local_network">Local network</string>
     <string name="module_files">Music and files</string>
     <string name="module_tpms">Tires</string>
+    <string name="module_spd">Head unit CAN box</string>
     <string name="tab_permissions">Permissions</string>
     <string name="about_help">About &amp; help</string>
     <string name="tab_updates">Updates</string>

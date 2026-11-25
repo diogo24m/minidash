@@ -115,6 +115,8 @@ internal object PrefKeys {
     const val CAR_TAP = "car_tap"
     /** Boolean; sin guardar = prendido si ya hay un adaptador OBD. */
     const val OBD_MODULE = "obd_module"
+    /** Boolean; la caja CAN de la pantalla ([SpdCar]), apagada de fábrica. */
+    const val SPD_MODULE = "spd_module"
     const val SPEED_UNITS = "speed_units"
     const val TEMP_UNITS = "temp_units"
 }
@@ -723,6 +725,9 @@ class Preferences(context: Context) {
     var obdModule by Stored(if (p.contains(PrefKeys.OBD_MODULE)) p.getBoolean(PrefKeys.OBD_MODULE, false) else null) { v ->
         p.edit { if (v == null) remove(PrefKeys.OBD_MODULE) else putBoolean(PrefKeys.OBD_MODULE, v) }
     }
+
+    /** El módulo «Caja CAN de la pantalla» ([SpdCar]): apagado de fábrica y solo se ofrece donde está comprobada. */
+    var spdModule by bool(PrefKeys.SPD_MODULE, false)
 
     /** Aviso arriba del inicio cuando una llanta tiene problema. */
     var tiresBanner by bool(PrefKeys.TIRES_BANNER, true)

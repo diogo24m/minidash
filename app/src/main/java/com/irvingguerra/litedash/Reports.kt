@@ -398,7 +398,7 @@ private const val PHONE_REPORT_GAP_MS = 10_000L
  * principal (todo es memoria).
  */
 private fun reportExtras(d: Dependencies): String = listOfNotNull(
-    d.phoneIfCreated()?.describe() ?: "Celular: sin vincular", projectionInfo(d), d.trip.describe(), MapPacks.describe(), d.weather.describe(), d.tpmsIfCreated()?.describe(), d.wheel.describe(), d.cars.describe(), d.updates?.describe(),
+    d.phoneIfCreated()?.describe() ?: "Celular: sin vincular", projectionInfo(d), d.trip.describe(), MapPacks.describe(), d.weather.describe(), d.tpmsIfCreated()?.describe(), d.spdIfCreated()?.describe(), d.wheel.describe(), d.cars.describe(), d.updates?.describe(),
 ).joinToString("\n")
 
 /** Android Auto / CarPlay: la elegida en Ajustes → Apps (o automática) y la que se abre ahora (de la lista ya cargada). */
@@ -437,6 +437,8 @@ private fun systemInfo(context: Context, pro: Boolean, layout: String, lights: S
         appendLine(storageReport(context))
         append(musicInfo)
         SystemSource.describe(context)?.let { append("\n").append(it) }
+        // La versión del servicio SPD y el perfil CAN, también sin comprobar: así se aprenden otras pantallas y autos.
+        SpdCar.describeScreen(context)?.let { append("\n").append(it) }
         // Apps de fábrica sin receptor ni servicio: lo que dejan ver, para aprender a hablarles.
         for (pkg in silent) append("\nSin control $pkg:").append(AppProbe.describe(context, pkg).ifEmpty { " nada legible" })
     }

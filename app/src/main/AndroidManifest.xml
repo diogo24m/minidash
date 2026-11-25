@@ -56,6 +56,8 @@
         <intent>
             <action android:name="android.settings.HOME_SETTINGS" />
         </intent>
+        <!-- Caja CAN de la pantalla (módulo apagado de fábrica): el servicio de datos del auto de las pantallas SPD. -->
+        <package android:name="com.spd.carinfo" />
     </queries>
 
     <!-- "Abrir LiteDash al encender" (apagado de fábrica): saber que la pantalla encendió y, desde

@@ -114,8 +114,12 @@ internal fun LocationManager.newestLastKnown(providers: List<String>): Location?
  * sin antena GPS) usa la red: mueve el punto del mapa, pero no da velocidad ni rumbo ni suma al viaje.
  */
 class TripRepository(private val context: Context, private val bus: VehicleBus) {
-    /** km/h del GPS; null = sin señal todavía. Las piezas leen la velocidad del bus (el OBD gana). */
-    private var speedKmh: Float? = null
+    /**
+     * km/h del GPS; null = sin señal todavía. Las piezas leen la velocidad del bus (el OBD gana). Es estado: la caja
+     * CAN de la pantalla ([SpdCar]) lo mira para no creerle un 0 mientras vas andando.
+     */
+    var speedKmh by mutableStateOf<Float?>(null)
+        private set
     var bearing by mutableStateOf<Float?>(null)
         private set
     /** La última posición (la lee el mapa); se queda aunque el GPS se apague. */

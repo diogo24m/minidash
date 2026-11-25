@@ -3,6 +3,13 @@
 What people using LiteDash notice, in English. The full history (in Spanish) is in [CHANGELOG.md](CHANGELOG.md).
 Format [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Head unit CAN box** (new module, off by default): on SPD head units where it's verified (for now, with the BMW
+  MINI profile), the speedometer and the fuel and battery gauges read the car through the head unit's CAN box, with no
+  OBD or GPS. Turn it on in Settings → Modules, which only shows it on those head units.
+
 ## [1.5.20] - 2026-11-25
 
 Designs: change your whole home screen with one tap. And online routes now work on screens with Android 9 or older.
